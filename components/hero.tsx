@@ -130,14 +130,70 @@ Código: ${produtoDestaque.codigo}`
       <div className="relative mx-auto grid w-full max-w-[1600px] items-center gap-10 px-5 py-10 sm:px-6 lg:min-h-[680px] lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-16">
         {/* TEXTO */}
 
-<div className="order-2 min-w-0 lg:order-1">
+<div className="min-w-0 lg:order-1">
           <span className="inline-block rounded-full border border-[#C8A95B]/30 bg-[#C8A95B]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#C8A95B] sm:px-5 sm:text-sm sm:tracking-[0.2em]">
             Nova Coleção
           </span>
 
           <h1 className="mt-6 max-w-3xl text-3xl font-black leading-[1.08] tracking-tight sm:mt-8 sm:text-4xl md:text-5xl lg:text-6xl">
             Elegância para mulheres que deixam sua marca.
-          </h1>
+          </h1>{/* BANNER MOBILE */}
+
+<div className="mt-8 block lg:hidden">
+  <div className="relative overflow-hidden rounded-[28px] border border-[#C8A95B]/25 bg-[#191919] shadow-[0_30px_100px_rgba(0,0,0,.55)]">
+
+    {produtoDestaque?.imagem_principal && (
+      <>
+        <img
+          src={produtoDestaque.imagem_principal}
+          alt={produtoDestaque.nome}
+          className="h-[340px] w-full object-cover"
+        />
+
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
+
+        <div className="absolute left-5 top-5 rounded-full bg-[#C8A95B] px-4 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#111111]">
+          Em destaque
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 p-6">
+
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#C8A95B]">
+            {produtoDestaque.marca}
+          </p>
+
+          <h2 className="mt-2 text-3xl font-black">
+            {produtoDestaque.nome}
+          </h2>
+
+          <div className="mt-4 flex items-center justify-between">
+
+            <span className="text-3xl font-black text-[#C8A95B]">
+              {Number(produtoDestaque.preco).toLocaleString(
+                "pt-BR",
+                {
+                  style: "currency",
+                  currency: "BRL",
+                }
+              )}
+            </span>
+
+            <Link
+              href={`/produto/${produtoDestaque.codigo}`}
+              className="rounded-full border border-[#C8A95B] bg-black/40 px-5 py-2 text-sm font-bold text-[#C8A95B]"
+            >
+              Ver detalhes
+            </Link>
+
+          </div>
+
+        </div>
+
+      </>
+    )}
+
+  </div>
+</div>
 
           <p className="mt-5 max-w-2xl text-base leading-7 text-[#F3E8D7]/70 sm:mt-8 sm:text-lg sm:leading-8">
             Descubra modelos exclusivos da MTelles que unem
@@ -240,7 +296,7 @@ Código: ${produtoDestaque.codigo}`
 
         {/* IMAGEM */}
 
-<div className="order-1 relative min-w-0 lg:order-2">
+<div className="relative hidden min-w-0 lg:block lg:order-2">
           <div className="absolute inset-0 rounded-[32px] bg-gradient-to-br from-[#C8A95B]/20 via-transparent to-transparent blur-3xl lg:rounded-[48px]" />
 
           <div className="relative min-h-[320px] overflow-hidden rounded-[28px] border border-[#C8A95B]/25 bg-[#191919] shadow-[0_30px_100px_rgba(0,0,0,.55)] sm:min-h-[420px] sm:rounded-[36px] lg:min-h-[540px] lg:rounded-[48px]">
