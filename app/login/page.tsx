@@ -2,39 +2,70 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+async function loginAdmin(
+  usuario: string,
+  senha: string
+) {
+  const { supabase } = await import("@/lib/supabase");
 
+  const { data, error } = await supabase
+    .from("usuarios_admin")
+    .select("*")
+    .eq("usuario", usuario)
+    .eq("senha_hash", senha)
+    .eq("ativo", true)
+    .single();
+
+  if (error) {
+    return null;
+  }
+
+  return data;
+}
 export default function LoginPage() {
 
   const [usuario, setUsuario] = useState("");
 
   const [senha, setSenha] = useState("");
 const router = useRouter();
-  function entrar(
+async function entrar(
   e: React.FormEvent
 ) {
 
   e.preventDefault();
 
-  if (
-    usuario === "admin" &&
-    senha === "123456"
-  ) {
-
-    localStorage.setItem(
-      "adminLogado",
-      "true"
+  const admin =
+    await loginAdmin(
+      usuario,
+      senha
     );
 
-    router.push("/admin");
+  if (!admin) {
+
+    alert("Usuário ou senha inválidos.");
 
     return;
 
   }
 
-  alert("Usuário ou senha inválidos.");
+  localStorage.setItem(
+    "adminLogado",
+    "true"
+  );
+
+  localStorage.setItem(
+    "adminNome",
+    admin.nome
+  );
+
+  localStorage.setItem(
+    "adminNivel",
+    admin.nivel
+  );
+
+  router.push("/admin");
 
 }
-
   return (
 
     <main className="flex min-h-screen items-center justify-center bg-[#111111] px-6">
