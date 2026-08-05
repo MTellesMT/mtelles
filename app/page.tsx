@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import Footer from "@/components/Footer";
 import Hero from "@/components/hero";
@@ -9,8 +13,6 @@ import SearchBar from "@/components/SearchBar";
 
 import { getProducts } from "@/services/products";
 import { Product } from "@/types/product";
-
-const whatsapp = "5521966682941";
 
 const OPCAO_TODAS = "Todas";
 
@@ -27,17 +29,24 @@ function normalizar(
 function transformarEmLista(
   valor: string | null | undefined
 ) {
-  if (!valor) return [];
+  if (!valor) {
+    return [];
+  }
 
   try {
     const convertido = JSON.parse(valor);
 
     if (Array.isArray(convertido)) {
       return convertido
-        .map((item) => String(item).trim())
+        .map((item) =>
+          String(item).trim()
+        )
         .filter(Boolean);
     }
-  } catch {}
+  } catch {
+    // O campo também pode conter valores
+    // separados por vírgulas.
+  }
 
   return valor
     .split(/[,;\n|]+/)
@@ -48,27 +57,35 @@ function transformarEmLista(
 function criarListaUnica(
   valores: string[]
 ) {
-  const mapa = new Map<string, string>();
+  const mapa = new Map<
+    string,
+    string
+  >();
 
   valores.forEach((valor) => {
-    const limpo = valor.trim();
+    const valorLimpo =
+      String(valor ?? "").trim();
 
-    const chave = normalizar(limpo);
+    const chave =
+      normalizar(valorLimpo);
 
     if (
-      limpo &&
+      valorLimpo &&
       chave &&
       !mapa.has(chave)
     ) {
-      mapa.set(chave, limpo);
+      mapa.set(
+        chave,
+        valorLimpo
+      );
     }
   });
 
   return Array.from(
     mapa.values()
-  ).sort((a, b) =>
-    a.localeCompare(
-      b,
+  ).sort((valorA, valorB) =>
+    valorA.localeCompare(
+      valorB,
       "pt-BR",
       {
         sensitivity: "base",
@@ -102,67 +119,97 @@ export default function Home() {
     setCorSelecionada,
   ] = useState(OPCAO_TODAS);
 
+  useEffect(() => {
+    async function carregarProdutos() {
+      try {
+        setLoading(true);
+
+        const dados =
+          await getProducts();
+
+        setProducts(dados);
+      } catch (error) {
+        console.error(
+          "Erro ao carregar produtos:",
+          error
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    carregarProdutos();
+  }, []);
+
   const produtosAtivos =
     useMemo(() => {
       return products.filter(
-        (produto) => produto.ativo
+        (produto) =>
+          produto.ativo
       );
     }, [products]);
 
   const marcasDisponiveis =
     useMemo(() => {
+      const marcas =
+        produtosAtivos.map(
+          (produto) =>
+            produto.marca
+        );
+
       return [
         OPCAO_TODAS,
         ...criarListaUnica(
-          produtosAtivos.map(
-            (produto) =>
-              produto.marca
-          )
+          marcas
         ),
       ];
     }, [produtosAtivos]);
 
   const categoriasDisponiveis =
     useMemo(() => {
+      const categorias =
+        produtosAtivos.map(
+          (produto) =>
+            produto.categoria
+        );
+
       return [
         OPCAO_TODAS,
         ...criarListaUnica(
-          produtosAtivos.map(
-            (produto) =>
-              produto.categoria
-          )
+          categorias
         ),
       ];
     }, [produtosAtivos]);
 
   const coresDisponiveis =
     useMemo(() => {
+      const cores =
+        produtosAtivos.flatMap(
+          (produto) =>
+            transformarEmLista(
+              produto.cores
+            )
+        );
+
       return [
         OPCAO_TODAS,
         ...criarListaUnica(
-          produtosAtivos.flatMap(
-            (produto) =>
-              transformarEmLista(
-                produto.cores
-              )
-          )
+          cores
         ),
       ];
     }, [produtosAtivos]);
-  useEffect(() => {
-    carregarProdutos();
-  }, []);
 
   useEffect(() => {
-    if (
-      !marcasDisponiveis.some(
+    const marcaAindaExiste =
+      marcasDisponiveis.some(
         (marca) =>
           normalizar(marca) ===
           normalizar(
             marcaSelecionada
           )
-      )
-    ) {
+      );
+
+    if (!marcaAindaExiste) {
       setMarcaSelecionada(
         OPCAO_TODAS
       );
@@ -173,15 +220,18 @@ export default function Home() {
   ]);
 
   useEffect(() => {
-    if (
-      !categoriasDisponiveis.some(
+    const categoriaAindaExiste =
+      categoriasDisponiveis.some(
         (categoria) =>
-          normalizar(categoria) ===
+          normalizar(
+            categoria
+          ) ===
           normalizar(
             categoriaSelecionada
           )
-      )
-    ) {
+      );
+
+    if (!categoriaAindaExiste) {
       setCategoriaSelecionada(
         OPCAO_TODAS
       );
@@ -192,15 +242,16 @@ export default function Home() {
   ]);
 
   useEffect(() => {
-    if (
-      !coresDisponiveis.some(
+    const corAindaExiste =
+      coresDisponiveis.some(
         (cor) =>
           normalizar(cor) ===
           normalizar(
             corSelecionada
           )
-      )
-    ) {
+      );
+
+    if (!corAindaExiste) {
       setCorSelecionada(
         OPCAO_TODAS
       );
@@ -209,21 +260,6 @@ export default function Home() {
     coresDisponiveis,
     corSelecionada,
   ]);
-
-  async function carregarProdutos() {
-    try {
-      setLoading(true);
-
-      const dados =
-        await getProducts();
-
-      setProducts(dados);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   function limparFiltros() {
     setBusca("");
@@ -278,7 +314,7 @@ export default function Home() {
               produto.material
             );
 
-          const cores =
+          const coresTexto =
             normalizar(
               produto.cores
             );
@@ -308,7 +344,7 @@ export default function Home() {
             material.includes(
               pesquisa
             ) ||
-            cores.includes(
+            coresTexto.includes(
               pesquisa
             ) ||
             tamanhos.includes(
@@ -334,7 +370,9 @@ export default function Home() {
           const coresProduto =
             transformarEmLista(
               produto.cores
-            ).map(normalizar);
+            ).map((cor) =>
+              normalizar(cor)
+            );
 
           const corOk =
             corSelecionada ===
@@ -363,167 +401,201 @@ export default function Home() {
 
   const quantidadeResultados =
     produtosFiltrados.length;
+
   return (
     <main className="min-h-screen bg-[#111111] text-white">
-
-      {/* ================= HEADER ================= */}
-
-
-      {/* ================= HERO ================= */}
+      {/* HERO */}
 
       <Hero
         produtos={products}
         loading={loading}
       />
 
-      {/* ================= CATÁLOGO ================= */}
+      {/* CATÁLOGO */}
 
       <section
         id="colecao"
-        className="mx-auto max-w-[1700px] px-6 py-20"
+        className="relative isolate bg-[#111111]"
       >
+        <div className="mx-auto w-full max-w-[1700px] px-4 py-14 sm:px-6 sm:py-20">
+          {/* TÍTULO DO CATÁLOGO */}
 
-        <div className="mb-12">
+          <header className="mb-10 sm:mb-12">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C8A95B] sm:text-sm sm:tracking-[0.35em]">
+              Nossa coleção
+            </p>
 
-          <p className="text-sm uppercase tracking-[0.35em] text-[#C8A95B]">
-            Nossa coleção
-          </p>
+            <h2 className="mt-4 max-w-4xl text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
+              Encontre seu próximo par
+            </h2>
+          </header>
 
-          <h2 className="mt-4 text-5xl font-black">
-            Encontre seu próximo par
-          </h2>
+          {/*
+            MOBILE:
+            Os filtros ficam no fluxo normal da página.
 
-        </div>
+            DESKTOP:
+            A partir de lg, filtros e produtos
+            ficam em duas colunas.
+          */}
 
-        <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+          <div className="block lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start lg:gap-8">
+            {/* ÁREA DOS FILTROS */}
 
-          {/* ================= SIDEBAR ================= */}
+            <div className="relative z-10 mb-10 w-full lg:sticky lg:top-6 lg:mb-0">
+              <SearchBar
+                busca={busca}
+                setBusca={setBusca}
+                produtos={products}
+                marcas={
+                  marcasDisponiveis
+                }
+                marcaSelecionada={
+                  marcaSelecionada
+                }
+                setMarcaSelecionada={
+                  setMarcaSelecionada
+                }
+                categorias={
+                  categoriasDisponiveis
+                }
+                categoriaSelecionada={
+                  categoriaSelecionada
+                }
+                setCategoriaSelecionada={
+                  setCategoriaSelecionada
+                }
+                cores={
+                  coresDisponiveis
+                }
+                corSelecionada={
+                  corSelecionada
+                }
+                setCorSelecionada={
+                  setCorSelecionada
+                }
+                quantidadeResultados={
+                  quantidadeResultados
+                }
+                limparFiltros={
+                  limparFiltros
+                }
+              />
+            </div>
 
-<SearchBar
-  busca={busca}
-  setBusca={setBusca}
-  produtos={products}
-  marcas={marcasDisponiveis}
-  marcaSelecionada={marcaSelecionada}
-  setMarcaSelecionada={setMarcaSelecionada}
-  categorias={categoriasDisponiveis}
-  categoriaSelecionada={categoriaSelecionada}
-  setCategoriaSelecionada={setCategoriaSelecionada}
-  cores={coresDisponiveis}
-  corSelecionada={corSelecionada}
-  setCorSelecionada={setCorSelecionada}
-  quantidadeResultados={quantidadeResultados}
-  limparFiltros={limparFiltros}
-/>
+            {/* ÁREA DOS PRODUTOS */}
 
-    
-          {/* ================= PRODUTOS ================= */}
+            <div className="relative z-0 min-w-0">
+              {loading ? (
+                <div className="flex min-h-80 items-center justify-center rounded-3xl border border-[#C8A95B]/15 bg-[#181818] px-6 text-center text-lg text-[#F3E8D7]/60">
+                  Carregando produtos...
+                </div>
+              ) : produtosFiltrados.length >
+                0 ? (
+                <>
+                  {/* CABEÇALHO DOS RESULTADOS */}
 
-          <div>
-            {loading ? (
+                  <div className="mb-8 flex flex-col gap-5 rounded-3xl border border-[#C8A95B]/15 bg-[#151515] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                    <div>
+                      <h3 className="text-2xl font-bold">
+                        Produtos
+                      </h3>
 
-              <div className="flex h-80 items-center justify-center text-lg text-[#F3E8D7]/60">
-                Carregando produtos...
-              </div>
+                      <p className="mt-1 text-sm text-[#F3E8D7]/60">
+                        {
+                          quantidadeResultados
+                        }{" "}
+                        {quantidadeResultados ===
+                        1
+                          ? "produto encontrado"
+                          : "produtos encontrados"}
+                      </p>
+                    </div>
 
-            ) : produtosFiltrados.length > 0 ? (
+                    <select
+                      aria-label="Ordenar produtos"
+                      defaultValue="recentes"
+                      className="w-full rounded-xl border border-[#C8A95B]/20 bg-[#181818] px-4 py-3 text-sm text-white outline-none transition focus:border-[#C8A95B] sm:w-auto"
+                    >
+                      <option value="recentes">
+                        Mais recentes
+                      </option>
 
-              <>
+                      <option value="menor-preco">
+                        Menor preço
+                      </option>
 
-                <div className="mb-8 flex items-center justify-between">
+                      <option value="maior-preco">
+                        Maior preço
+                      </option>
 
-                  <div>
-
-                    <h3 className="text-2xl font-bold">
-                      Produtos
-                    </h3>
-
-                    <p className="mt-1 text-sm text-[#F3E8D7]/60">
-                      {quantidadeResultados} produtos encontrados
-                    </p>
-
+                      <option value="alfabetica">
+                        Ordem alfabética
+                      </option>
+                    </select>
                   </div>
 
-                  <select
-                    className="rounded-xl border border-[#C8A95B]/20 bg-[#181818] px-4 py-3 text-sm outline-none"
+                  {/* GRID DOS PRODUTOS */}
+
+                  <div className="relative grid min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                    {produtosFiltrados.map(
+                      (produto) => (
+                        <div
+                          key={
+                            produto.id
+                          }
+                          className="relative min-w-0"
+                        >
+                          <ProductCard
+                            produto={
+                              produto
+                            }
+                          />
+                        </div>
+                      )
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] px-5 py-20 text-center sm:px-8 sm:py-24">
+                  <div className="text-6xl">
+                    🔍
+                  </div>
+
+                  <h3 className="mt-6 text-2xl font-bold sm:text-3xl">
+                    Nenhum produto
+                    encontrado
+                  </h3>
+
+                  <p className="mx-auto mt-4 max-w-xl leading-7 text-[#F3E8D7]/60">
+                    Tente alterar os
+                    filtros ou limpar a
+                    pesquisa para visualizar
+                    novamente todos os
+                    produtos.
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={
+                      limparFiltros
+                    }
+                    className="mt-8 rounded-full bg-[#C8A95B] px-8 py-4 font-bold text-[#111111] transition hover:bg-[#e3c46f]"
                   >
-                    <option>
-                      Mais recentes
-                    </option>
-
-                    <option>
-                      Menor preço
-                    </option>
-
-                    <option>
-                      Maior preço
-                    </option>
-
-                    <option>
-                      Ordem alfabética
-                    </option>
-
-                  </select>
-
+                    Mostrar todos
+                  </button>
                 </div>
-
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-
-                  {produtosFiltrados.map(
-                    (produto) => (
-
-                      <ProductCard
-                        key={produto.id}
-                        produto={produto}
-                      />
-
-                    )
-                  )}
-
-                </div>
-
-              </>
-
-            ) : (
-
-              <div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] py-24 text-center">
-
-                <div className="text-6xl">
-                  🔍
-                </div>
-
-                <h3 className="mt-6 text-3xl font-bold">
-                  Nenhum produto encontrado
-                </h3>
-
-                <p className="mt-4 text-[#F3E8D7]/60">
-                  Tente alterar os filtros ou limpar a pesquisa.
-                </p>
-
-                <button
-                  onClick={limparFiltros}
-                  className="mt-8 rounded-full bg-[#C8A95B] px-8 py-4 font-bold text-[#111111]"
-                >
-                  Mostrar todos
-                </button>
-
-              </div>
-
-            )}
-
+              )}
+            </div>
           </div>
-
         </div>
-
       </section>
-      {/* ================= BENEFÍCIOS ================= */}
 
-      <section className="border-y border-[#C8A95B]/15 bg-[#151515]">
+      {/* BENEFÍCIOS */}
 
-        <div className="mx-auto grid max-w-[1600px] gap-6 px-6 py-16 md:grid-cols-3">
-
-          <div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-8">
-
+      <section className="relative border-y border-[#C8A95B]/15 bg-[#151515]">
+        <div className="mx-auto grid max-w-[1600px] gap-6 px-4 py-14 sm:px-6 sm:py-16 md:grid-cols-3">
+          <article className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-7 sm:p-8">
             <div className="text-4xl">
               ✨
             </div>
@@ -533,78 +605,74 @@ export default function Home() {
             </h3>
 
             <p className="mt-4 text-sm leading-7 text-[#F3E8D7]/60">
-              Produtos escolhidos para mulheres que valorizam conforto,
-              qualidade e sofisticação em cada detalhe.
+              Produtos escolhidos para
+              mulheres que valorizam
+              conforto, qualidade e
+              sofisticação em cada detalhe.
             </p>
+          </article>
 
-          </div>
-
-          <div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-8">
-
+          <article className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-7 sm:p-8">
             <div className="text-4xl">
               💬
             </div>
 
             <h3 className="mt-5 text-xl font-bold">
-              Atendimento Personalizado
+              Atendimento personalizado
             </h3>
 
             <p className="mt-4 text-sm leading-7 text-[#F3E8D7]/60">
-              Tire dúvidas e finalize sua compra diretamente pelo WhatsApp
-              com atendimento rápido e humanizado.
+              Tire dúvidas e finalize sua
+              compra diretamente pelo
+              WhatsApp com atendimento
+              rápido e humanizado.
             </p>
+          </article>
 
-          </div>
-
-          <div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-8">
-
+          <article className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-7 sm:p-8">
             <div className="text-4xl">
               🚚
             </div>
 
             <h3 className="mt-5 text-xl font-bold">
-              Compra Segura
+              Compra segura
             </h3>
 
             <p className="mt-4 text-sm leading-7 text-[#F3E8D7]/60">
-              Processo simples, seguro e acompanhado do início ao fim.
+              Processo simples, seguro e
+              acompanhado do início ao fim.
             </p>
-
-          </div>
-
+          </article>
         </div>
-
       </section>
 
-      {/* ================= SOBRE ================= */}
+      {/* SOBRE */}
 
       <section
         id="sobre"
-        className="mx-auto max-w-6xl px-6 py-16 text-center"
+        className="relative mx-auto max-w-6xl px-4 py-14 text-center sm:px-6 sm:py-16"
       >
-
-        <p className="text-sm uppercase tracking-[0.35em] text-[#C8A95B]">
+        <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C8A95B] sm:text-sm sm:tracking-[0.35em]">
           Sobre a MTelles
         </p>
 
-        <h2 className="mt-5 text-4xl font-bold">
+        <h2 className="mt-5 text-3xl font-bold sm:text-4xl">
           Elegância em cada passo.
         </h2>
 
         <p className="mx-auto mt-6 max-w-3xl leading-8 text-[#F3E8D7]/60">
-          A MTelles nasceu para oferecer calçados femininos modernos,
-          elegantes e confortáveis, proporcionando uma experiência de compra
-          premium desde a escolha do produto até o atendimento.
+          A MTelles nasceu para oferecer
+          calçados femininos modernos,
+          elegantes e confortáveis,
+          proporcionando uma experiência de
+          compra premium desde a escolha do
+          produto até o atendimento.
         </p>
-
       </section>
 
-      {/* ================= FOOTER ================= */}
+      {/* FOOTER */}
 
       <Footer />
-
     </main>
   );
 }
-
-      

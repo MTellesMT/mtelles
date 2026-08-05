@@ -933,8 +933,7 @@ export default function SearchBar({
   }
 
   return (
-  <aside className="sticky top-24 rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6 shadow-2xl">
-      <div className="relative z-50">
+<aside className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6 shadow-2xl">      <div className="relative z-50">
         <div className="relative">
           <input
             ref={inputRef}

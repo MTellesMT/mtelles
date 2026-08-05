@@ -93,7 +93,7 @@ Código: ${produto.codigo}`
 
   return (
 
-    <article className="group overflow-hidden rounded-3xl border border-[#C8A95B]/20 bg-[#181818] shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.01] hover:border-[#C8A95B] hover:shadow-[0_25px_80px_rgba(200,169,91,.18)]">
+    <article className="group overflow-hidden rounded-3xl border border-[#C8A95B]/20 bg-[#181818] shadow-2xl">
 
       {/* FOTO */}
 
@@ -115,10 +115,10 @@ Código: ${produto.codigo}`
           {imagemSelecionada ? (
 
             <img
-              src={imagemSelecionada}
-              alt={produto.nome}
-              className="h-[260px] w-full object-contain transition-all duration-700 group-hover:scale-105"
-            />
+  src={imagemSelecionada}
+  alt={produto.nome}
+  className="h-[260px] w-full object-contain"
+/>
 
           ) : (
 
