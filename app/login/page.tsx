@@ -2,15 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 async function loginAdmin(
   usuario: string,
   senha: string
 ) {
-  const { supabase } = await import("@/lib/supabase");
-
   const { data, error } = await supabase
     .from("usuarios_admin")
-    .select("*")
+    .select("id,nome,usuario,nivel,ativo")
     .eq("usuario", usuario)
     .eq("senha_hash", senha)
     .eq("ativo", true)
@@ -22,6 +21,7 @@ async function loginAdmin(
 
   return data;
 }
+
 export default function LoginPage() {
 
   const [usuario, setUsuario] = useState("");
@@ -52,7 +52,20 @@ async function entrar(
     "adminLogado",
     "true"
   );
+localStorage.setItem(
+  "adminNome",
+  admin.nome
+);
 
+localStorage.setItem(
+  "adminNivel",
+  admin.nivel
+);
+
+localStorage.setItem(
+  "adminId",
+  String(admin.id)
+);
   localStorage.setItem(
     "adminNome",
     admin.nome
