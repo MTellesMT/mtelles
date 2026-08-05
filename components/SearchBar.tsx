@@ -320,7 +320,14 @@ export default function SearchBar({
 
   const [historico, setHistorico] =
     useState<string[]>([]);
+const [abrirMarcas, setAbrirMarcas] =
+  useState(false);
 
+const [abrirCategorias, setAbrirCategorias] =
+  useState(false);
+
+const [abrirCores, setAbrirCores] =
+  useState(false);
   const filtrosAtivos =
     busca.trim() !== "" ||
     marcaSelecionada !==
@@ -1246,29 +1253,65 @@ export default function SearchBar({
       </div>
 
       <div className="mt-8 border-t border-[#C8A95B]/10 pt-8">
-        <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-[#C8A95B]">
-          Cores
-        </p>
 
-        <div className="flex flex-col gap-2">
-          {cores.map((cor) => (
-            <button
-              key={cor}
-              type="button"
-              onClick={() =>
-                setCorSelecionada(cor)
-              }
-              className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-semibold transition ${
-                corSelecionada === cor
-                  ? "border-[#C8A95B] bg-[#C8A95B] text-[#111111]"
-                  : "border-[#C8A95B]/25 bg-[#111111] text-white hover:border-[#C8A95B]"
-              }`}
-            >
-              {cor}
-            </button>
-          ))}
-        </div>
-      </div>
+  <button
+    type="button"
+    onClick={() => setAbrirCores(!abrirCores)}
+    className="flex w-full items-center justify-between rounded-xl border border-[#C8A95B]/20 bg-[#111111] px-4 py-4 transition hover:border-[#C8A95B]"
+  >
+    <div className="text-left">
+
+      <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C8A95B]">
+        Cores
+      </p>
+
+      <p className="mt-1 text-sm text-[#F3E8D7]/60">
+        {corSelecionada === OPCAO_TODAS
+          ? "Selecionar cor"
+          : corSelecionada}
+      </p>
+
+    </div>
+
+    <span
+      className={`text-xl text-[#C8A95B] transition-transform duration-300 ${
+        abrirCores ? "rotate-180" : ""
+      }`}
+    >
+      ▼
+    </span>
+
+  </button>
+
+  {abrirCores && (
+
+    <div className="mt-4 flex flex-col gap-2">
+
+      {cores.map((cor) => (
+
+        <button
+          key={cor}
+          type="button"
+          onClick={() => {
+            setCorSelecionada(cor);
+            setAbrirCores(false);
+          }}
+          className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-semibold transition ${
+            corSelecionada === cor
+              ? "border-[#C8A95B] bg-[#C8A95B] text-[#111111]"
+              : "border-[#C8A95B]/25 bg-[#111111] text-white hover:border-[#C8A95B]"
+          }`}
+        >
+          {cor}
+        </button>
+
+      ))}
+
+    </div>
+
+  )}
+
+</div>
 
       <div className="mt-10 flex flex-col gap-4 border-t border-[#C8A95B]/20 pt-8 md:flex-row md:items-center md:justify-between">
         <div>
