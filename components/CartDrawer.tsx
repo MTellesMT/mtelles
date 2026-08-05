@@ -1,5 +1,6 @@
 "use client";
-
+import { useState } from "react";
+import { criarPedido } from "@/services/pedidos";
 import { useCart } from "./CartContext";
 
 const whatsapp = "5521966682941";
@@ -17,10 +18,12 @@ export default function CartDrawer() {
     limparCarrinho,
   } = useCart();
 
-  if (!aberto) {
-    return null;
-  }
+const [enviando, setEnviando] =
+  useState(false);
 
+if (!aberto) {
+  return null;
+}
   const mensagem = encodeURIComponent(
     `Olá! Gostaria de comprar:
 
@@ -58,6 +61,101 @@ ${total.toLocaleString("pt-BR", {
   currency: "BRL",
 })}`
   );
+async function finalizarPedido() {
+
+  try {
+
+    setEnviando(true);
+
+    const nome =
+      prompt("Informe seu nome:") ?? "";
+
+    if (!nome.trim()) {
+      setEnviando(false);
+      return;
+    }
+
+    const telefone =
+      prompt("Informe seu WhatsApp:") ?? "";
+
+    if (!telefone.trim()) {
+      setEnviando(false);
+      return;
+    }
+
+    await criarPedido(
+
+      {
+        nome_cliente: nome,
+        telefone,
+        total,
+      },
+
+      itens.map((item) => ({
+
+        produto_id:
+          item.produto.id,
+
+        nome_produto:
+          item.produto.nome,
+
+        codigo:
+          item.produto.codigo,
+
+        marca:
+          item.produto.marca,
+
+        cor:
+          item.cor,
+
+        tamanho:
+          item.tamanho,
+
+        quantidade:
+          item.quantidade,
+
+        preco:
+          item.produto.preco,
+
+        subtotal:
+          item.produto.preco *
+          item.quantidade,
+
+      }))
+
+    );
+
+    const url = `https://wa.me/${whatsapp}?text=${mensagem}`;
+
+console.log("URL:", url);
+
+window.location.href = url;
+
+limparCarrinho();
+
+fecharCarrinho();
+
+  } catch (error) {
+
+  console.error("ERRO COMPLETO:", error);
+
+  if (error instanceof Error) {
+
+    alert(error.message);
+
+  } else {
+
+    alert(JSON.stringify(error, null, 2));
+
+  }
+
+} finally {
+
+    setEnviando(false);
+
+  }
+
+}
 
   return (
     <>
@@ -323,14 +421,16 @@ ${total.toLocaleString("pt-BR", {
               Limpar Carrinho
             </button>
 
-            <a
-              href={`https://wa.me/${whatsapp}?text=${mensagem}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full rounded-full bg-[#C8A95B] py-4 text-center font-bold text-[#111111] transition hover:scale-[1.02] hover:bg-[#e5c96f]"
-            >
-              Finalizar pelo WhatsApp
-            </a>
+            <button
+  type="button"
+  onClick={finalizarPedido}
+  disabled={enviando}
+  className="block w-full rounded-full bg-[#C8A95B] py-4 text-center font-bold text-[#111111] transition hover:scale-[1.02] hover:bg-[#e5c96f] disabled:cursor-not-allowed disabled:opacity-60"
+>
+  {enviando
+    ? "Registrando pedido..."
+    : "Finalizar pelo WhatsApp"}
+</button>
           </div>
         )}
       </aside>
