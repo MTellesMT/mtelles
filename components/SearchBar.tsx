@@ -1194,64 +1194,135 @@ const [abrirCores, setAbrirCores] =
         )}
       </div>
 
+      <div className="mt-8">
+
+  <button
+    type="button"
+    onClick={() => setAbrirMarcas(!abrirMarcas)}
+    className="flex w-full items-center justify-between rounded-xl border border-[#C8A95B]/20 bg-[#111111] px-4 py-4 transition hover:border-[#C8A95B]"
+  >
+
+    <div className="text-left">
+
+      <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C8A95B]">
+        Marcas
+      </p>
+
+      <p className="mt-1 text-sm text-[#F3E8D7]/60">
+        {marcaSelecionada === OPCAO_TODAS
+          ? "Selecionar marca"
+          : marcaSelecionada}
+      </p>
+
+    </div>
+
+    <span
+      className={`text-xl text-[#C8A95B] transition-transform duration-300 ${
+        abrirMarcas ? "rotate-180" : ""
+      }`}
+    >
+      ▼
+    </span>
+
+  </button>
+
+  {abrirMarcas && (
+
+    <div className="mt-4 flex flex-col gap-2">
+
+      {marcas.map((marca) => (
+
+        <button
+          key={marca}
+          type="button"
+          onClick={() => {
+
+            setMarcaSelecionada(marca);
+
+            setAbrirMarcas(false);
+
+          }}
+          className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-semibold transition ${
+            marcaSelecionada === marca
+              ? "border-[#C8A95B] bg-[#C8A95B] text-[#111111]"
+              : "border-[#C8A95B]/25 bg-[#111111] text-white hover:border-[#C8A95B]"
+          }`}
+        >
+          {marca}
+        </button>
+
+      ))}
+
+    </div>
+
+  )}
+
+</div>
+
       <div className="mt-8 border-t border-[#C8A95B]/10 pt-8">
-        <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-[#C8A95B]">
-          Marcas
-        </p>
 
-       <div className="flex flex-col gap-2">
-          {marcas.map((marca) => (
-            <button
-              key={marca}
-              type="button"
-              onClick={() =>
-                setMarcaSelecionada(
-                  marca
-                )
-              }
-              className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-semibold transition ${
-                marcaSelecionada ===
-                marca
-                  ? "border-[#C8A95B] bg-[#C8A95B] text-[#111111]"
-                  : "border-[#C8A95B]/25 bg-[#111111] text-white hover:border-[#C8A95B]"
-              }`}
-            >
-              {marca}
-            </button>
-          ))}
-        </div>
-      </div>
+  <button
+    type="button"
+    onClick={() => setAbrirCategorias(!abrirCategorias)}
+    className="flex w-full items-center justify-between rounded-xl border border-[#C8A95B]/20 bg-[#111111] px-4 py-4 transition hover:border-[#C8A95B]"
+  >
 
-      <div className="mt-8 border-t border-[#C8A95B]/10 pt-8">
-        <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-[#C8A95B]">
-          Categorias
-        </p>
+    <div className="text-left">
 
-        <div className="flex flex-col gap-2">
-          {categorias.map(
-            (categoria) => (
-              <button
-                key={categoria}
-                type="button"
-                onClick={() =>
-                  setCategoriaSelecionada(
-                    categoria
-                  )
-                }
-                className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-semibold transition ${
-                  categoriaSelecionada ===
-                  categoria
-                    ? "border-[#C8A95B] bg-[#C8A95B] text-[#111111]"
-                    : "border-[#C8A95B]/25 bg-[#111111] text-white hover:border-[#C8A95B]"
-                }`}
-              >
-                {categoria}
-              </button>
-            )
-          )}
-        </div>
-      </div>
+      <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C8A95B]">
+        Categorias
+      </p>
 
+      <p className="mt-1 text-sm text-[#F3E8D7]/60">
+        {categoriaSelecionada === OPCAO_TODAS
+          ? "Selecionar categoria"
+          : categoriaSelecionada}
+      </p>
+
+    </div>
+
+    <span
+      className={`text-xl text-[#C8A95B] transition-transform duration-300 ${
+        abrirCategorias ? "rotate-180" : ""
+      }`}
+    >
+      ▼
+    </span>
+
+  </button>
+
+  {abrirCategorias && (
+
+    <div className="mt-4 flex flex-col gap-2">
+
+      {categorias.map((categoria) => (
+
+        <button
+          key={categoria}
+          type="button"
+          onClick={() => {
+
+            setCategoriaSelecionada(categoria);
+
+            setAbrirCategorias(false);
+
+          }}
+          className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-semibold transition ${
+            categoriaSelecionada === categoria
+              ? "border-[#C8A95B] bg-[#C8A95B] text-[#111111]"
+              : "border-[#C8A95B]/25 bg-[#111111] text-white hover:border-[#C8A95B]"
+          }`}
+        >
+          {categoria}
+        </button>
+
+      ))}
+
+    </div>
+
+  )}
+
+</div>
       <div className="mt-8 border-t border-[#C8A95B]/10 pt-8">
 
   <button
