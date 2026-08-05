@@ -156,7 +156,7 @@ export default function AdministradoresPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
 
   <a
-    href="/admin/produto"
+    href="/admin/produtos"
     className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6 transition hover:border-[#C8A95B]"
   >
     <h2 className="text-xl font-bold">
