@@ -130,7 +130,7 @@ Código: ${produtoDestaque.codigo}`
       <div className="relative mx-auto grid w-full max-w-[1600px] items-center gap-10 px-5 py-10 sm:px-6 lg:min-h-[680px] lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-16">
         {/* TEXTO */}
 
-        <div className="min-w-0">
+<div className="order-2 min-w-0 lg:order-1">
           <span className="inline-block rounded-full border border-[#C8A95B]/30 bg-[#C8A95B]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#C8A95B] sm:px-5 sm:text-sm sm:tracking-[0.2em]">
             Nova Coleção
           </span>
@@ -146,7 +146,7 @@ Código: ${produtoDestaque.codigo}`
           </p>
 
           {produtoDestaque && (
-            <div className="mt-6 rounded-2xl border border-[#C8A95B]/20 bg-white/[0.03] p-4 backdrop-blur sm:mt-8 sm:rounded-3xl">
+            <div className="mt-6 hidden rounded-2xl border border-[#C8A95B]/20 bg-white/[0.03] p-4 backdrop-blur sm:mt-8 sm:rounded-3xl lg:block">
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#C8A95B] sm:tracking-[0.25em]">
                 Produto em destaque
               </p>
@@ -240,7 +240,7 @@ Código: ${produtoDestaque.codigo}`
 
         {/* IMAGEM */}
 
-        <div className="relative min-w-0">
+<div className="order-1 relative min-w-0 lg:order-2">
           <div className="absolute inset-0 rounded-[32px] bg-gradient-to-br from-[#C8A95B]/20 via-transparent to-transparent blur-3xl lg:rounded-[48px]" />
 
           <div className="relative min-h-[320px] overflow-hidden rounded-[28px] border border-[#C8A95B]/25 bg-[#191919] shadow-[0_30px_100px_rgba(0,0,0,.55)] sm:min-h-[420px] sm:rounded-[36px] lg:min-h-[540px] lg:rounded-[48px]">
