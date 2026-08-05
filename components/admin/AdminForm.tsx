@@ -38,7 +38,7 @@ export default function AdminForm({
 
     onCreated();
 
-    alert("Administrador criado com sucesso.");
+    alert("Colaborador cadastrado com sucesso.");
   }
 
   return (
@@ -47,11 +47,10 @@ export default function AdminForm({
       className="mb-8 rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6"
     >
       <h2 className="mb-6 text-2xl font-bold">
-        Novo Administrador
+        Novo Colaborador
       </h2>
 
       <div className="grid gap-6 md:grid-cols-2">
-
         <div>
           <label className="mb-2 block">
             Nome
@@ -59,9 +58,7 @@ export default function AdminForm({
 
           <input
             value={nome}
-            onChange={(e) =>
-              setNome(e.target.value)
-            }
+            onChange={(e) => setNome(e.target.value)}
             className="w-full rounded-xl border border-[#C8A95B]/20 bg-[#111111] p-3"
             required
           />
@@ -74,9 +71,7 @@ export default function AdminForm({
 
           <input
             value={usuario}
-            onChange={(e) =>
-              setUsuario(e.target.value)
-            }
+            onChange={(e) => setUsuario(e.target.value)}
             className="w-full rounded-xl border border-[#C8A95B]/20 bg-[#111111] p-3"
             required
           />
@@ -90,9 +85,7 @@ export default function AdminForm({
           <input
             type="password"
             value={senha}
-            onChange={(e) =>
-              setSenha(e.target.value)
-            }
+            onChange={(e) => setSenha(e.target.value)}
             className="w-full rounded-xl border border-[#C8A95B]/20 bg-[#111111] p-3"
             required
           />
@@ -100,36 +93,31 @@ export default function AdminForm({
 
         <div>
           <label className="mb-2 block">
-            Nível
+            Cargo
           </label>
 
           <select
             value={nivel}
-            onChange={(e) =>
-              setNivel(e.target.value)
-            }
+            onChange={(e) => setNivel(e.target.value)}
             className="w-full rounded-xl border border-[#C8A95B]/20 bg-[#111111] p-3"
           >
             <option value="ADMIN">
-              ADMIN
+              Funcionário
             </option>
 
             <option value="MASTER">
-              MASTER
+              Gerência
             </option>
-
           </select>
         </div>
-
       </div>
 
       <button
         type="submit"
         className="mt-8 rounded-xl bg-[#C8A95B] px-8 py-3 font-bold text-[#111111]"
       >
-        Salvar Administrador
+        Salvar Colaborador
       </button>
-
     </form>
   );
 }

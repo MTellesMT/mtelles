@@ -1,132 +1,230 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import ProductForm from "@/components/admin/ProductForm";
-import ProductTable from "@/components/admin/ProductTable";
-import {
-  deleteProduct,
-  getProducts,
-} from "@/services/products";
-import { Product } from "@/types/product";
+import AdminForm from "@/components/admin/AdminForm";
 
-export default function AdminPage() {
-  const [products, setProducts] = useState<Product[]>([]);
+import {
+  alterarStatusAdmin,
+  deleteAdmin,
+  getAdmins,
+  updateAdmin,
+} from "@/services/admins";
+
+interface Admin {
+  id: number;
+  nome: string;
+  usuario: string;
+  nivel: string;
+  ativo: boolean;
+}
+
+export default function AdministradoresPage() {
+  const [admins, setAdmins] = useState<Admin[]>([]);
   const [loading, setLoading] = useState(true);
-const router = useRouter();
-const [produtoEmEdicao, setProdutoEmEdicao] =
-  useState<Product | null>(null);
-  const carregarProdutos = useCallback(async () => {
+
+  const carregarAdmins = useCallback(async () => {
     try {
       setLoading(true);
 
-      const data = await getProducts();
+      const data = await getAdmins();
 
-      setProducts(data);
+      setAdmins(data ?? []);
     } catch (error) {
-      console.error("Erro ao carregar produtos:", error);
-      alert("Não foi possível carregar os produtos.");
+      console.error(error);
+
+      alert(
+        "Erro ao carregar colaboradores."
+      );
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    carregarAdmins();
+  }, [carregarAdmins]);
 
-  const autenticado =
-    localStorage.getItem("adminLogado");
-
-  if (autenticado !== "true") {
-
-    router.replace("/login");
-
-    return;
-
-  }
-
-  carregarProdutos();
-
-}, [carregarProdutos, router]);
-  async function excluirProduto(id: number) {
+  async function alterarStatus(
+    id: number,
+    ativo: boolean
+  ) {
     try {
-      await deleteProduct(id);
+      await alterarStatusAdmin(
+        id,
+        !ativo
+      );
 
-      await carregarProdutos();
-
-      alert("Produto excluído com sucesso!");
+      carregarAdmins();
     } catch (error) {
-      console.error("Erro ao excluir produto:", error);
-      alert("Não foi possível excluir o produto.");
+      console.error(error);
+
+      alert(
+        "Não foi possível alterar o status."
+      );
     }
   }
 
- function editarProduto(product: Product) {
-  setProdutoEmEdicao(product);
+  async function excluir(id: number) {
+    const confirmar = confirm(
+      "Deseja realmente excluir este colaborador?"
+    );
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-}
+    if (!confirmar) {
+      return;
+    }
+
+    try {
+      await deleteAdmin(id);
+
+      carregarAdmins();
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Não foi possível excluir."
+      );
+    }
+  }
+
+  async function editar(admin: Admin) {
+    const nome = prompt(
+      "Nome:",
+      admin.nome
+    );
+
+    if (!nome) return;
+
+    const usuario = prompt(
+      "Usuário:",
+      admin.usuario
+    );
+
+    if (!usuario) return;
+
+    const cargoAtual =
+      admin.nivel === "MASTER"
+        ? "Gerência"
+        : "Funcionário";
+
+    const cargo = prompt(
+      "Cargo (Gerência ou Funcionário):",
+      cargoAtual
+    );
+
+    if (!cargo) return;
+
+    const nivel =
+      cargo.toLowerCase() === "gerência" ||
+      cargo.toLowerCase() === "gerencia"
+        ? "MASTER"
+        : "ADMIN";
+
+    try {
+      await updateAdmin(
+        admin.id,
+        nome,
+        usuario,
+        nivel
+      );
+
+      carregarAdmins();
+
+      alert(
+        "Colaborador atualizado."
+      );
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Erro ao atualizar."
+      );
+    }
+  }
 
   return (
-    <main className="min-h-screen bg-[#111111] px-4 py-10 text-white md:px-8">
+    <main className="min-h-screen bg-[#111111] p-8 text-white">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-10">
-          <p className="text-sm uppercase tracking-[0.25em] text-[#C8A95B]">
-            MTelles
-          </p>
 
-          <h1 className="mt-2 text-4xl font-bold">
-            Painel Administrativo
-          </h1>
+        <h1 className="mb-2 text-4xl font-black">
+  Painel Administrativo
+</h1>
 
-          <p className="mt-3 text-[#F3E8D7]/60">
-            Cadastre e gerencie os produtos da loja.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-4">
+<p className="mb-8 text-[#F3E8D7]/70">
+  Bem-vindo ao gerenciamento da MTelles.
+</p>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+
+  <a
+    href="/admin/produto"
+    className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6 transition hover:border-[#C8A95B]"
+  >
+    <h2 className="text-xl font-bold">
+      Produtos
+    </h2>
+
+    <p className="mt-2 text-sm text-[#F3E8D7]/70">
+      Cadastrar e editar produtos.
+    </p>
+  </a>
 
   <a
     href="/admin/administradores"
-    className="rounded-xl bg-[#C8A95B] px-6 py-3 font-semibold text-[#111111] transition hover:scale-105"
+    className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6 transition hover:border-[#C8A95B]"
   >
-    Administradores
+    <h2 className="text-xl font-bold">
+      Colaboradores
+    </h2>
+
+    <p className="mt-2 text-sm text-[#F3E8D7]/70">
+      Gerenciar colaboradores.
+    </p>
   </a>
 
-  <button
-    onClick={() => {
-      localStorage.removeItem("adminLogado");
-      localStorage.removeItem("adminNome");
-      localStorage.removeItem("adminNivel");
-      localStorage.removeItem("adminId");
+  <div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6 opacity-60">
+    <h2 className="text-xl font-bold">
+      Pedidos
+    </h2>
 
-      window.location.href = "/login";
-    }}
-    className="rounded-xl border border-red-500 px-6 py-3 font-semibold text-red-400 transition hover:bg-red-500 hover:text-white"
-  >
-    Sair
-  </button>
+    <p className="mt-2 text-sm">
+      Em breve
+    </p>
+  </div>
+
+  <div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6 opacity-60">
+    <h2 className="text-xl font-bold">
+      Relatórios
+    </h2>
+
+    <p className="mt-2 text-sm">
+      Em breve
+    </p>
+  </div>
 
 </div>
-        </div>
 
-        <ProductForm
-  onProductCreated={carregarProdutos}
-  productToEdit={produtoEmEdicao}
-  onCancelEdit={() => setProdutoEmEdicao(null)}
-/>
+<div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-8 text-center">
 
-        {loading ? (
-          <div className="mt-12 rounded-3xl border border-[#C8A95B]/20 p-10 text-center text-[#F3E8D7]/60">
-            Carregando produtos...
-          </div>
-        ) : (
-          <ProductTable
-            products={products}
-            onDelete={excluirProduto}
-            onEdit={editarProduto}
-          />
-        )}
+  <h2 className="text-2xl font-bold">
+    Área Administrativa
+  </h2>
+
+  <p className="mt-4 text-[#F3E8D7]/70">
+    Utilize os atalhos acima para acessar cada módulo do sistema.
+  </p>
+
+</div>
+<div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-8 text-center">
+
+  <h2 className="text-2xl font-bold">
+    Área Administrativa
+  </h2>
+
+  <p className="mt-4 text-[#F3E8D7]/70">
+    Utilize os atalhos acima para acessar cada módulo do sistema.
+  </p>
+
+</div>
       </div>
     </main>
   );

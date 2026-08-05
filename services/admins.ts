@@ -38,4 +38,38 @@ export async function alterarStatusAdmin(
   if (error) {
     throw error;
   }
+}export async function updateAdmin(
+  id: number,
+  nome: string,
+  usuario: string,
+  nivel: string
+) {
+  const { error } = await supabase
+    .from("usuarios_admin")
+    .update({
+      nome,
+      usuario,
+      nivel,
+    })
+    .eq("id", id);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function alterarSenhaAdmin(
+  id: number,
+  senha: string
+) {
+  const { error } = await supabase
+    .from("usuarios_admin")
+    .update({
+      senha_hash: senha,
+    })
+    .eq("id", id);
+
+  if (error) {
+    throw error;
+  }
 }

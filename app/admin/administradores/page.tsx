@@ -1,14 +1,25 @@
 "use client";
-import AdminForm from "@/components/admin/AdminForm";
+
 import { useCallback, useEffect, useState } from "react";
+import AdminForm from "@/components/admin/AdminForm";
+
 import {
   alterarStatusAdmin,
   deleteAdmin,
   getAdmins,
+  updateAdmin,
 } from "@/services/admins";
 
+interface Admin {
+  id: number;
+  nome: string;
+  usuario: string;
+  nivel: string;
+  ativo: boolean;
+}
+
 export default function AdministradoresPage() {
-  const [admins, setAdmins] = useState<any[]>([]);
+  const [admins, setAdmins] = useState<Admin[]>([]);
   const [loading, setLoading] = useState(true);
 
   const carregarAdmins = useCallback(async () => {
@@ -17,65 +28,154 @@ export default function AdministradoresPage() {
 
       const data = await getAdmins();
 
-      setAdmins(data);
+      setAdmins(data ?? []);
     } catch (error) {
       console.error(error);
 
-      alert("Erro ao carregar administradores.");
+      alert(
+        "Erro ao carregar administradores."
+      );
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    carregarAdmins();
-  }, [carregarAdmins]);
+  const logado =
+    localStorage.getItem("adminLogado");
+
+  const nivel =
+    localStorage.getItem("adminNivel");
+
+  if (logado !== "true") {
+    window.location.href = "/login";
+    return;
+  }
+
+  if (nivel !== "MASTER") {
+    alert(
+  "Você não possui permissão para acessar esta área."
+);
+
+setTimeout(() => {
+  window.location.replace("/admin");
+}, 100);
+
+return;
+  }
+
+  carregarAdmins();
+}, [carregarAdmins]);
 
   async function alterarStatus(
     id: number,
     ativo: boolean
   ) {
-    await alterarStatusAdmin(id, !ativo);
+    try {
+      await alterarStatusAdmin(
+        id,
+        !ativo
+      );
 
-    carregarAdmins();
+      carregarAdmins();
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Não foi possível alterar o status."
+      );
+    }
   }
 
   async function excluir(id: number) {
-    if (
-      !confirm(
-        "Deseja realmente excluir este administrador?"
-      )
-    ) {
+    const confirmar = confirm(
+      "Deseja realmente excluir este administrador?"
+    );
+
+    if (!confirmar) {
       return;
     }
 
-    await deleteAdmin(id);
+    try {
+      await deleteAdmin(id);
 
-    carregarAdmins();
+      carregarAdmins();
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Não foi possível excluir."
+      );
+    }
+  }
+
+  async function editar(
+    admin: Admin
+  ) {
+    const nome = prompt(
+      "Nome:",
+      admin.nome
+    );
+
+    if (!nome) return;
+
+    const usuario = prompt(
+      "Usuário:",
+      admin.usuario
+    );
+
+    if (!usuario) return;
+
+    const nivel = prompt(
+      "Nível (MASTER ou ADMIN):",
+      admin.nivel
+    );
+
+    if (!nivel) return;
+
+    try {
+      await updateAdmin(
+        admin.id,
+        nome,
+        usuario,
+        nivel.toUpperCase()
+      );
+
+      carregarAdmins();
+
+      alert(
+        "Administrador atualizado."
+      );
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Erro ao atualizar."
+      );
+    }
   }
 
   return (
     <main className="min-h-screen bg-[#111111] p-8 text-white">
-
       <div className="mx-auto max-w-7xl">
 
         <h1 className="mb-8 text-4xl font-black">
           Administradores
         </h1>
-<AdminForm
-  onCreated={carregarAdmins}
-/>
+
+        <AdminForm
+          onCreated={carregarAdmins}
+        />
+
         {loading ? (
-
-          <p>Carregando...</p>
-
+          <div className="mt-10 rounded-3xl border border-[#C8A95B]/20 p-10 text-center">
+            Carregando...
+          </div>
         ) : (
-
           <div className="overflow-hidden rounded-3xl border border-[#C8A95B]/20">
-
             <table className="w-full">
 
-              <thead className="bg-[#1a1a1a]">
+              <thead className="bg-[#181818]">
 
                 <tr>
 
@@ -104,14 +204,11 @@ export default function AdministradoresPage() {
               </thead>
 
               <tbody>
-
                 {admins.map((admin) => (
-
                   <tr
                     key={admin.id}
                     className="border-t border-[#C8A95B]/10"
                   >
-
                     <td className="p-4">
                       {admin.nome}
                     </td>
@@ -121,16 +218,41 @@ export default function AdministradoresPage() {
                     </td>
 
                     <td className="p-4">
-                      {admin.nivel}
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-bold ${
+                          admin.nivel === "MASTER"
+                            ? "bg-[#C8A95B] text-[#111111]"
+                            : "bg-[#222222] text-white"
+                        }`}
+                      >
+                        {admin.nivel}
+                      </span>
                     </td>
 
                     <td className="p-4">
-                      {admin.ativo
-                        ? "Ativo"
-                        : "Inativo"}
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-bold ${
+                          admin.ativo
+                            ? "bg-green-600"
+                            : "bg-red-600"
+                        }`}
+                      >
+                        {admin.ativo
+                          ? "Ativo"
+                          : "Inativo"}
+                      </span>
                     </td>
 
                     <td className="space-x-2 p-4 text-center">
+
+                      <button
+                        onClick={() =>
+                          editar(admin)
+                        }
+                        className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold transition hover:bg-blue-700"
+                      >
+                        Editar
+                      </button>
 
                       <button
                         onClick={() =>
@@ -139,7 +261,7 @@ export default function AdministradoresPage() {
                             admin.ativo
                           )
                         }
-                        className="rounded-lg bg-yellow-600 px-3 py-2"
+                        className="rounded-lg bg-yellow-500 px-3 py-2 text-sm font-semibold text-[#111111] transition hover:bg-yellow-400"
                       >
                         {admin.ativo
                           ? "Desativar"
@@ -150,27 +272,28 @@ export default function AdministradoresPage() {
                         onClick={() =>
                           excluir(admin.id)
                         }
-                        className="rounded-lg bg-red-600 px-3 py-2"
+                        className="rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold transition hover:bg-red-700"
                       >
                         Excluir
                       </button>
 
                     </td>
-
                   </tr>
-
                 ))}
-
               </tbody>
 
             </table>
 
-          </div>
+            {admins.length === 0 && (
+              <div className="p-10 text-center text-[#F3E8D7]/60">
+                Nenhum administrador cadastrado.
+              </div>
+            )}
 
+          </div>
         )}
 
       </div>
-
     </main>
   );
 }
