@@ -84,6 +84,30 @@ const [produtoEmEdicao, setProdutoEmEdicao] =
           <p className="mt-3 text-[#F3E8D7]/60">
             Cadastre e gerencie os produtos da loja.
           </p>
+          <div className="mt-6 flex flex-wrap gap-4">
+
+  <a
+    href="/admin/administradores"
+    className="rounded-xl bg-[#C8A95B] px-6 py-3 font-semibold text-[#111111] transition hover:scale-105"
+  >
+    Administradores
+  </a>
+
+  <button
+    onClick={() => {
+      localStorage.removeItem("adminLogado");
+      localStorage.removeItem("adminNome");
+      localStorage.removeItem("adminNivel");
+      localStorage.removeItem("adminId");
+
+      window.location.href = "/login";
+    }}
+    className="rounded-xl border border-red-500 px-6 py-3 font-semibold text-red-400 transition hover:bg-red-500 hover:text-white"
+  >
+    Sair
+  </button>
+
+</div>
         </div>
 
         <ProductForm
