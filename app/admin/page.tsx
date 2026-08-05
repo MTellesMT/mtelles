@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import ProductForm from "@/components/admin/ProductForm";
 import ProductTable from "@/components/admin/ProductTable";
 import {
@@ -12,7 +13,7 @@ import { Product } from "@/types/product";
 export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-
+const router = useRouter();
 const [produtoEmEdicao, setProdutoEmEdicao] =
   useState<Product | null>(null);
   const carregarProdutos = useCallback(async () => {
@@ -31,9 +32,21 @@ const [produtoEmEdicao, setProdutoEmEdicao] =
   }, []);
 
   useEffect(() => {
-    carregarProdutos();
-  }, [carregarProdutos]);
 
+  const autenticado =
+    localStorage.getItem("adminLogado");
+
+  if (autenticado !== "true") {
+
+    router.replace("/login");
+
+    return;
+
+  }
+
+  carregarProdutos();
+
+}, [carregarProdutos, router]);
   async function excluirProduto(id: number) {
     try {
       await deleteProduct(id);
