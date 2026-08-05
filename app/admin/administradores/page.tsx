@@ -1,5 +1,5 @@
 "use client";
-
+import AdminForm from "@/components/admin/AdminForm";
 import { useCallback, useEffect, useState } from "react";
 import {
   alterarStatusAdmin,
@@ -62,7 +62,9 @@ export default function AdministradoresPage() {
         <h1 className="mb-8 text-4xl font-black">
           Administradores
         </h1>
-
+<AdminForm
+  onCreated={carregarAdmins}
+/>
         {loading ? (
 
           <p>Carregando...</p>
