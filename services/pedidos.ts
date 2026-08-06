@@ -78,12 +78,23 @@ export async function getItensPedido(
   const { data, error } =
     await supabase
       .from(ITENS)
-      .select("*")
+      .select(`
+        *,
+        produtos (
+          imagem_principal
+        )
+      `)
       .eq("pedido_id", pedidoId);
 
   if (error) throw error;
 
-  return data ?? [];
+  return (
+    data?.map((item: any) => ({
+      ...item,
+      imagem_principal:
+        item.produtos?.imagem_principal ?? "",
+    })) ?? []
+  );
 }
 
 export async function atualizarStatusPedido(

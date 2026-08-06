@@ -382,8 +382,8 @@ useEffect(() => {
 </div>
 </div>
      {modalAberto && pedidoSelecionado && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-    <div className="w-full max-w-2xl rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-8">
+  <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 p-4">
+    <div className="mx-auto my-8 w-full max-w-2xl rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-8">
 
       <div className="mb-6 flex items-center justify-between">
 
@@ -489,69 +489,101 @@ useEffect(() => {
         key={item.id}
         className="rounded-xl border border-[#C8A95B]/20 bg-[#111111] p-4"
       >
+      <div className="flex flex-col gap-5 md:flex-row">
 
-        <h4 className="font-semibold">
-          {item.nome_produto}
-        </h4>
+ <div className="group relative h-40 w-full shrink-0 overflow-hidden rounded-2xl border border-[#C8A95B]/30 bg-[#181818] shadow-lg shadow-black/30 md:h-44 md:w-44">
 
-        <p className="text-sm text-[#F3E8D7]/70">
-          Código: {item.codigo}
-        </p>
+  {item.imagem_principal ? (
+    <img
+      src={item.imagem_principal}
+      alt={item.nome_produto}
+      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+    />
+  ) : (
+    <div className="flex h-full w-full items-center justify-center text-5xl">
+      👠
+    </div>
+  )}
 
-        <p className="text-sm text-[#F3E8D7]/70">
-          Marca: {item.marca}
-        </p>
-
-        <div className="mt-2 flex flex-wrap gap-2">
-
-  <span className="rounded-full bg-[#C8A95B]/15 px-3 py-1 text-xs font-semibold text-[#C8A95B]">
-    Cor: {item.cor}
-  </span>
-
-  <span className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-300">
-    Tam: {item.tamanho}
-  </span>
+  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/5" />
 
 </div>
 
-        <p className="text-sm text-[#F3E8D7]/70">
-          Quantidade: {item.quantidade}
-        </p>
+  <div className="flex flex-1 flex-col">
 
-        <div className="mt-3 flex items-center justify-between">
+    <h4 className="text-xl font-bold text-white">
+      {item.nome_produto}
+    </h4>
 
-  <span className="text-sm text-[#F3E8D7]/70">
-    Preço:
+    <p className="mt-2 text-sm text-[#F3E8D7]/70">
+      Código: {item.codigo}
+    </p>
+
+    <p className="text-sm text-[#F3E8D7]/70">
+      Marca: {item.marca}
+    </p>
+
+    <p className="text-sm text-[#F3E8D7]/70">
+      Cor: {item.cor}
+    </p>
+
+    <p className="text-sm text-[#F3E8D7]/70">
+      Tam: {item.tamanho}
+    </p>
+
+    <div className="mt-4 flex items-center gap-2">
+  <span className="text-lg">📦</span>
+
+  <span className="text-sm font-semibold text-[#F3E8D7]">
+    Quantidade:
   </span>
 
-  <span className="font-semibold text-[#C8A95B]">
-    {Number(item.preco).toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    })}
+  <span className="rounded-full bg-[#C8A95B]/15 px-3 py-1 text-sm font-bold text-[#C8A95B]">
+    {item.quantidade}
   </span>
-
 </div>
 
-<div className="flex items-center justify-between">
+<div className="mt-6 border-t border-[#C8A95B]/10 pt-4 space-y-3">
 
-  <span className="text-sm text-[#F3E8D7]/70">
-    Subtotal:
-  </span>
+  <div className="flex items-center justify-between">
 
-  <span className="font-bold text-green-400">
-    {(Number(item.preco) * Number(item.quantidade)).toLocaleString(
-      "pt-BR",
-      {
+    <span className="text-sm text-[#F3E8D7]/70">
+      Preço
+    </span>
+
+    <span className="font-semibold text-[#C8A95B]">
+      {Number(item.preco).toLocaleString("pt-BR", {
         style: "currency",
         currency: "BRL",
-      }
-    )}
-  </span>
+      })}
+    </span>
+
+  </div>
+
+  <div className="flex items-center justify-between">
+
+    <span className="text-sm text-[#F3E8D7]/70">
+      Subtotal
+    </span>
+
+    <span className="font-bold text-green-400">
+      {(Number(item.preco) * Number(item.quantidade)).toLocaleString(
+        "pt-BR",
+        {
+          style: "currency",
+          currency: "BRL",
+        }
+      )}
+    </span>
+
+  </div>
 
 </div>
+    </div>
 
-      </div>
+  </div>
+
+</div>  
 
     ))
 
