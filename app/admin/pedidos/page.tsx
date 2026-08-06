@@ -387,9 +387,21 @@ useEffect(() => {
 
       <div className="mb-6 flex items-center justify-between">
 
-        <h2 className="text-2xl font-bold">
-          Detalhes do Pedido
-        </h2>
+        <div className="flex items-center justify-between">
+
+  <div>
+
+    <h2 className="text-2xl font-bold">
+      Detalhes do Pedido
+    </h2>
+
+    <p className="mt-1 text-sm text-[#F3E8D7]/60">
+      Pedido #{pedidoSelecionado.id}
+    </p>
+
+  </div>
+
+</div>
 
         <button
           onClick={() => {
@@ -415,10 +427,27 @@ useEffect(() => {
           {pedidoSelecionado.telefone}
         </p>
 
-        <p>
-          <strong>Status:</strong>{" "}
-          {pedidoSelecionado.status}
-        </p>
+        <div className="flex items-center gap-2">
+
+  <strong>Status:</strong>
+
+  <span
+    className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${
+      pedidoSelecionado.status === "PENDENTE"
+        ? "bg-yellow-500/20 text-yellow-400"
+        : pedidoSelecionado.status === "ENVIADO"
+        ? "bg-purple-500/20 text-purple-400"
+        : pedidoSelecionado.status === "ENTREGUE"
+        ? "bg-green-500/20 text-green-400"
+        : pedidoSelecionado.status === "CANCELADO"
+        ? "bg-red-500/20 text-red-400"
+        : "bg-gray-500/20 text-gray-300"
+    }`}
+  >
+    {pedidoSelecionado.status}
+  </span>
+
+</div>
 
         <p>
           <strong>Total:</strong>{" "}
