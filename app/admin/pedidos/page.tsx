@@ -204,7 +204,13 @@ useEffect(() => {
 
       ) : (
 
-        pedidosFiltrados.map((pedido) => (
+        [...pedidosFiltrados]
+  .sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() -
+      new Date(a.created_at).getTime()
+  )
+  .map((pedido) => (
 
           <tr
             key={pedido.id}
