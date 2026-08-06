@@ -11,6 +11,7 @@ import Alertas from "./components/Alertas";
 import Movimentacoes from "./components/Movimentacoes";
 import TabelaEstoque from "./components/TabelaEstoque";
 interface ResumoRelatorio {
+
   totalPedidos: number;
   pedidosEntregues: number;
   faturamento: number;
@@ -19,26 +20,36 @@ interface ResumoRelatorio {
   percentualEntregues: number;
 
   produtosBaixoEstoque: {
-    nome: string;
-    estoque: number;
-  }[];
-
-  movimentacoes: {
-  id: number;
-  tipo: string;
-  produto: string;
-  quantidade: number;
-  motivo: string;
-  created_at: string;
-}[];
-
-produtos: {
-  id: number;
-  nome: string;
-  codigo: string;
   marca: string;
+  nome: string;
   estoque: number;
 }[];
+
+  movimentacoes: {
+    id: number;
+    tipo: string;
+    produto: string;
+    quantidade: number;
+    motivo: string;
+    created_at: string;
+  }[];
+
+  pedidos: {
+    id: number;
+    cliente: string;
+    status: string;
+    total: number;
+    created_at: string;
+  }[];
+
+  produtos: {
+    id: number;
+    nome: string;
+    codigo: string;
+    marca: string;
+    cores: string;
+    estoque: number;
+  }[];
 
 }
 
@@ -57,8 +68,10 @@ export default function RelatoriosPage() {
 
     produtosBaixoEstoque: [],
 
-    movimentacoes: [],
-    produtos: [],
+movimentacoes: [],
+pedidos: [],
+produtos: [],
+
   });
 
   useEffect(() => {
@@ -156,6 +169,11 @@ export default function RelatoriosPage() {
   totalPedidos={resumo.totalPedidos}
   pedidosEntregues={resumo.pedidosEntregues}
   percentualEntregues={resumo.percentualEntregues}
+  produtos={resumo.produtos}
+  pedidos={resumo.pedidos}
+  produtosBaixoEstoque={
+  resumo.produtosBaixoEstoque
+}
 />
 
 <ResumoFinanceiro

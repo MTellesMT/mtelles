@@ -8,19 +8,27 @@ export async function getResumoRelatorio() {
   const { data: pedidos, error: erroPedidos } =
     await supabase
       .from(PEDIDOS)
-      .select("total,status");
-
+      .select(`
+  id,
+  nome_cliente,
+  status,
+  total,
+  created_at
+`)
   if (erroPedidos) throw erroPedidos;
+
+console.log("PEDIDOS:", pedidos);
 
   const { data: produtos, error: erroProdutos } =
     await supabase
       .from(PRODUTOS)
       .select(
-        "id,nome,codigo,marca,estoque"
-      );
+  "id,nome,codigo,marca,cores,estoque"
+)
 
   if (erroProdutos) throw erroProdutos;
 
+console.log("PRODUTOS:", produtos);
   const {
     data: movimentacoes,
     error: erroMovimentacoes,
@@ -73,7 +81,8 @@ export async function getResumoRelatorio() {
       : (pedidosEntregues.length *
           100) /
         (pedidos?.length ?? 1);
-
+        
+console.log("BAIXO ESTOQUE:", produtosBaixoEstoque);
   return {
     totalPedidos:
       pedidos?.length ?? 0,
@@ -90,27 +99,35 @@ export async function getResumoRelatorio() {
     percentualEntregues,
 
     produtosBaixoEstoque:
-      produtosBaixoEstoque.map(
-        (produto) => ({
-          nome: produto.nome,
-          estoque: Number(
-            produto.estoque
-          ),
-        })
+  produtosBaixoEstoque.map(
+    (produto) => ({
+      marca: produto.marca,
+      nome: produto.nome,
+      estoque: Number(
+        produto.estoque
       ),
-
+    })
+  ),
     movimentacoes:
       movimentacoes ?? [],
 
-    produtos:
-      produtos?.map((produto) => ({
-        id: produto.id,
-        nome: produto.nome,
-        codigo: produto.codigo,
-        marca: produto.marca,
-        estoque: Number(
-          produto.estoque
-        ),
-      })) ?? [],
+pedidos:
+  pedidos?.map((pedido) => ({
+    id: pedido.id,
+    cliente: pedido.nome_cliente,
+    status: pedido.status,
+    total: Number(pedido.total),
+    created_at: pedido.created_at,
+  })) ?? [],
+
+     produtos:
+produtos?.map((produto) => ({
+   id: produto.id,
+  nome: produto.nome,
+   codigo: produto.codigo,
+   marca: produto.marca,
+   cores: produto.cores,
+   estoque: Number(produto.estoque),
+ })) ?? [],
   };
 }
