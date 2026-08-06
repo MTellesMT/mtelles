@@ -523,13 +523,17 @@ useEffect(() => {
       Marca: {item.marca}
     </p>
 
-    <p className="text-sm text-[#F3E8D7]/70">
-      Cor: {item.cor}
-    </p>
+    <div className="mt-4 flex flex-wrap gap-3">
 
-    <p className="text-sm text-[#F3E8D7]/70">
-      Tam: {item.tamanho}
-    </p>
+  <span className="rounded-full border border-[#C8A95B]/30 bg-[#C8A95B]/10 px-4 py-1.5 text-sm font-semibold text-[#C8A95B]">
+    🎨 {item.cor}
+  </span>
+
+  <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-sm font-semibold text-blue-300">
+    📏 {item.tamanho}
+  </span>
+
+</div>
 
     <div className="mt-4 flex items-center gap-2">
   <span className="text-lg">📦</span>
