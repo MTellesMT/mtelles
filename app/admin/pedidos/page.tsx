@@ -473,13 +473,17 @@ useEffect(() => {
           Marca: {item.marca}
         </p>
 
-        <p className="text-sm text-[#F3E8D7]/70">
-          Cor: {item.cor}
-        </p>
+        <div className="mt-2 flex flex-wrap gap-2">
 
-        <p className="text-sm text-[#F3E8D7]/70">
-          Tamanho: {item.tamanho}
-        </p>
+  <span className="rounded-full bg-[#C8A95B]/15 px-3 py-1 text-xs font-semibold text-[#C8A95B]">
+    Cor: {item.cor}
+  </span>
+
+  <span className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-300">
+    Tam: {item.tamanho}
+  </span>
+
+</div>
 
         <p className="text-sm text-[#F3E8D7]/70">
           Quantidade: {item.quantidade}
