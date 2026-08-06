@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import {
   atualizarStatusPedido,
+  getItensPedido,
   getPedidos,
 } from "@/services/pedidos";
 
@@ -23,6 +24,9 @@ const [pedidoSelecionado, setPedidoSelecionado] =
 const [modalAberto, setModalAberto] =
   useState(false);
 
+const [itensPedido, setItensPedido] =
+  useState<any[]>([]);
+  
 const pedidosPendentes = pedidos.filter(
   (pedido) => pedido.status === "PENDENTE"
 );
@@ -299,10 +303,18 @@ useEffect(() => {
 
   <div className="flex items-center gap-3">
 
-    <button
-  onClick={() => {
-    setPedidoSelecionado(pedido);
-    setModalAberto(true);
+   <button
+  onClick={async () => {
+    try {
+      const itens = await getItensPedido(pedido.id);
+
+      setItensPedido(itens);
+      setPedidoSelecionado(pedido);
+      setModalAberto(true);
+    } catch (error) {
+      console.error(error);
+      alert("Não foi possível carregar os itens do pedido.");
+    }
   }}
   className="rounded-lg bg-[#C8A95B] px-4 py-2 text-sm font-semibold text-[#111111] transition hover:brightness-110"
 >
@@ -425,6 +437,68 @@ useEffect(() => {
             pedidoSelecionado.created_at
           ).toLocaleString("pt-BR")}
         </p>
+
+<hr className="border-[#C8A95B]/20" />
+
+<h3 className="text-lg font-bold">
+  Produtos
+</h3>
+
+<div className="space-y-3">
+
+  {itensPedido.length === 0 ? (
+
+    <p className="text-[#F3E8D7]/60">
+      Nenhum produto encontrado.
+    </p>
+
+  ) : (
+
+    itensPedido.map((item) => (
+
+      <div
+        key={item.id}
+        className="rounded-xl border border-[#C8A95B]/20 bg-[#111111] p-4"
+      >
+
+        <h4 className="font-semibold">
+          {item.nome_produto}
+        </h4>
+
+        <p className="text-sm text-[#F3E8D7]/70">
+          Código: {item.codigo}
+        </p>
+
+        <p className="text-sm text-[#F3E8D7]/70">
+          Marca: {item.marca}
+        </p>
+
+        <p className="text-sm text-[#F3E8D7]/70">
+          Cor: {item.cor}
+        </p>
+
+        <p className="text-sm text-[#F3E8D7]/70">
+          Tamanho: {item.tamanho}
+        </p>
+
+        <p className="text-sm text-[#F3E8D7]/70">
+          Quantidade: {item.quantidade}
+        </p>
+
+        <p className="font-semibold text-[#C8A95B]">
+          {Number(item.preco).toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          })}
+        </p>
+
+      </div>
+
+    ))
+
+  )}
+
+</div>
 
       </div>
 
