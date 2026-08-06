@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 
 const PRODUTOS = "produtos";
-const MOVIMENTACOES = "movimentacao_estoque";
+const MOVIMENTACOES = "movimentacoes";
 
 interface MovimentacaoEstoque {
   produto_id: number;
@@ -12,13 +12,62 @@ interface MovimentacaoEstoque {
   observacao?: string;
 }
 
+async function buscarProduto(
+  produtoId: number
+) {
+  const { data, error } =
+    await supabase
+      .from(PRODUTOS)
+      .select("id,nome,estoque")
+      .eq("id", produtoId)
+      .single();
+
+  if (error) throw error;
+
+  return data;
+}
+
+async function registrarMovimentacao(
+  produto: {
+    id: number;
+    nome: string;
+  },
+  movimentacao: MovimentacaoEstoque,
+  estoqueAnterior: number,
+  estoqueAtual: number
+) {
+  const { error } =
+    await supabase
+      .from(MOVIMENTACOES)
+      .insert({
+        produto: produto.nome,
+        produto_id: produto.id,
+        tipo: movimentacao.tipo,
+        quantidade: movimentacao.quantidade,
+        estoque_anterior:
+          estoqueAnterior,
+        estoque_atual:
+          estoqueAtual,
+        motivo: movimentacao.motivo,
+        referencia:
+          movimentacao.referencia ??
+          null,
+        observacao:
+          movimentacao.observacao ??
+          null,
+      });
+
+  if (error) throw error;
+}
+
 export async function getMovimentacoes() {
-  const { data, error } = await supabase
-    .from(MOVIMENTACOES)
-    .select("*")
-    .order("created_at", {
-      ascending: false,
-    });
+  const { data, error } =
+    await supabase
+      .from(MOVIMENTACOES)
+      .select("*")
+      .order("created_at", {
+        ascending: false,
+      });
 
   if (error) throw error;
 
@@ -28,62 +77,51 @@ export async function getMovimentacoes() {
 export async function registrarEntrada(
   movimentacao: MovimentacaoEstoque
 ) {
-  const { data: produto, error } = await supabase
-    .from(PRODUTOS)
-    .select("estoque")
-    .eq("id", movimentacao.produto_id)
-    .single();
+  const produto =
+    await buscarProduto(
+      movimentacao.produto_id
+    );
 
-  if (error) throw error;
-
-  const estoqueAnterior = Number(produto.estoque);
+  const estoqueAnterior =
+    Number(produto.estoque);
 
   const estoqueAtual =
-    estoqueAnterior + movimentacao.quantidade;
+    estoqueAnterior +
+    movimentacao.quantidade;
 
-  const { error: erroAtualizar } = await supabase
+  const {
+    error: erroAtualizar,
+  } = await supabase
     .from(PRODUTOS)
     .update({
       estoque: estoqueAtual,
     })
-    .eq("id", movimentacao.produto_id);
+    .eq("id", produto.id);
 
-  if (erroAtualizar) throw erroAtualizar;
+  if (erroAtualizar)
+    throw erroAtualizar;
 
-  const { error: erroMovimentacao } =
-    await supabase
-      .from(MOVIMENTACOES)
-      .insert({
-        produto_id: movimentacao.produto_id,
-        tipo: "ENTRADA",
-        quantidade: movimentacao.quantidade,
-        estoque_anterior: estoqueAnterior,
-        estoque_atual: estoqueAtual,
-        motivo: movimentacao.motivo,
-        referencia:
-          movimentacao.referencia ?? null,
-        observacao:
-          movimentacao.observacao ?? null,
-      });
-
-  if (erroMovimentacao) throw erroMovimentacao;
+  await registrarMovimentacao(
+    produto,
+    movimentacao,
+    estoqueAnterior,
+    estoqueAtual
+  );
 }
-
 export async function registrarSaida(
   movimentacao: MovimentacaoEstoque
 ) {
-  const { data: produto, error } = await supabase
-    .from(PRODUTOS)
-    .select("estoque")
-    .eq("id", movimentacao.produto_id)
-    .single();
+  const produto =
+    await buscarProduto(
+      movimentacao.produto_id
+    );
 
-  if (error) throw error;
-
-  const estoqueAnterior = Number(produto.estoque);
+  const estoqueAnterior =
+    Number(produto.estoque);
 
   if (
-    estoqueAnterior < movimentacao.quantidade
+    estoqueAnterior <
+    movimentacao.quantidade
   ) {
     throw new Error(
       "Estoque insuficiente."
@@ -91,76 +129,59 @@ export async function registrarSaida(
   }
 
   const estoqueAtual =
-    estoqueAnterior - movimentacao.quantidade;
+    estoqueAnterior -
+    movimentacao.quantidade;
 
-  const { error: erroAtualizar } = await supabase
+  const {
+    error: erroAtualizar,
+  } = await supabase
     .from(PRODUTOS)
     .update({
       estoque: estoqueAtual,
     })
-    .eq("id", movimentacao.produto_id);
+    .eq("id", produto.id);
 
-  if (erroAtualizar) throw erroAtualizar;
+  if (erroAtualizar)
+    throw erroAtualizar;
 
-  const { error: erroMovimentacao } =
-    await supabase
-      .from(MOVIMENTACOES)
-      .insert({
-        produto_id: movimentacao.produto_id,
-        tipo: "SAIDA",
-        quantidade: movimentacao.quantidade,
-        estoque_anterior: estoqueAnterior,
-        estoque_atual: estoqueAtual,
-        motivo: movimentacao.motivo,
-        referencia:
-          movimentacao.referencia ?? null,
-        observacao:
-          movimentacao.observacao ?? null,
-      });
-
-  if (erroMovimentacao) throw erroMovimentacao;
+  await registrarMovimentacao(
+    produto,
+    movimentacao,
+    estoqueAnterior,
+    estoqueAtual
+  );
 }
 
 export async function registrarAjuste(
   movimentacao: MovimentacaoEstoque
 ) {
-  const { data: produto, error } = await supabase
-    .from(PRODUTOS)
-    .select("estoque")
-    .eq("id", movimentacao.produto_id)
-    .single();
+  const produto =
+    await buscarProduto(
+      movimentacao.produto_id
+    );
 
-  if (error) throw error;
-
-  const estoqueAnterior = Number(produto.estoque);
+  const estoqueAnterior =
+    Number(produto.estoque);
 
   const estoqueAtual =
     movimentacao.quantidade;
 
-  const { error: erroAtualizar } = await supabase
+  const {
+    error: erroAtualizar,
+  } = await supabase
     .from(PRODUTOS)
     .update({
       estoque: estoqueAtual,
     })
-    .eq("id", movimentacao.produto_id);
+    .eq("id", produto.id);
 
-  if (erroAtualizar) throw erroAtualizar;
+  if (erroAtualizar)
+    throw erroAtualizar;
 
-  const { error: erroMovimentacao } =
-    await supabase
-      .from(MOVIMENTACOES)
-      .insert({
-        produto_id: movimentacao.produto_id,
-        tipo: "AJUSTE",
-        quantidade: movimentacao.quantidade,
-        estoque_anterior: estoqueAnterior,
-        estoque_atual: estoqueAtual,
-        motivo: movimentacao.motivo,
-        referencia:
-          movimentacao.referencia ?? null,
-        observacao:
-          movimentacao.observacao ?? null,
-      });
-
-  if (erroMovimentacao) throw erroMovimentacao;
+  await registrarMovimentacao(
+    produto,
+    movimentacao,
+    estoqueAnterior,
+    estoqueAtual
+  );
 }
