@@ -193,15 +193,18 @@ export default function AdministradoresPage() {
     Gerenciar pedidos.
   </p>
 </Link>
-  <div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6 opacity-60">
-    <h2 className="text-xl font-bold">
-      Relatórios
-    </h2>
+  <Link
+  href="/admin/relatorios"
+  className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6 transition duration-300 hover:scale-[1.02] hover:border-[#C8A95B] hover:shadow-lg hover:shadow-[#C8A95B]/10"
+>
+  <h2 className="text-xl font-bold">
+    Relatórios
+  </h2>
 
-    <p className="mt-2 text-sm">
-      Em breve
-    </p>
-  </div>
+  <p className="mt-2 text-sm text-[#F3E8D7]/70">
+    Visualizar estatísticas e indicadores.
+  </p>
+</Link>
 
 </div>
 
