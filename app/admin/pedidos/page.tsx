@@ -293,7 +293,15 @@ useEffect(() => {
 </td>     
 <td className="p-4">
 
-  <select
+  <div className="flex items-center gap-3">
+
+    <button
+      className="rounded-lg bg-[#C8A95B] px-4 py-2 text-sm font-semibold text-[#111111] transition hover:brightness-110"
+    >
+      Ver
+    </button>
+
+    <select
     value={pedido.status}
    onChange={async (e) => {
 
@@ -337,6 +345,8 @@ useEffect(() => {
     </option>
 
   </select>
+
+</div>
 
 </td>
           </tr>
