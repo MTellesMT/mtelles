@@ -485,12 +485,38 @@ useEffect(() => {
           Quantidade: {item.quantidade}
         </p>
 
-        <p className="font-semibold text-[#C8A95B]">
-          {Number(item.preco).toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-          })}
-        </p>
+        <div className="mt-3 flex items-center justify-between">
+
+  <span className="text-sm text-[#F3E8D7]/70">
+    Preço:
+  </span>
+
+  <span className="font-semibold text-[#C8A95B]">
+    {Number(item.preco).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    })}
+  </span>
+
+</div>
+
+<div className="flex items-center justify-between">
+
+  <span className="text-sm text-[#F3E8D7]/70">
+    Subtotal:
+  </span>
+
+  <span className="font-bold text-green-400">
+    {(Number(item.preco) * Number(item.quantidade)).toLocaleString(
+      "pt-BR",
+      {
+        style: "currency",
+        currency: "BRL",
+      }
+    )}
+  </span>
+
+</div>
 
       </div>
 
