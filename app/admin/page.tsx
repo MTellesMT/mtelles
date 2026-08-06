@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import AdminForm from "@/components/admin/AdminForm";
-
+import Link from "next/link";
 import {
   alterarStatusAdmin,
   deleteAdmin,
@@ -181,16 +181,18 @@ export default function AdministradoresPage() {
     </p>
   </a>
 
-  <div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6 opacity-60">
-    <h2 className="text-xl font-bold">
-      Pedidos
-    </h2>
+<Link
+  href="/admin/pedidos"
+  className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6 transition hover:border-[#C8A95B] hover:scale-[1.02]"
+>
+  <h2 className="text-xl font-bold">
+    Pedidos
+  </h2>
 
-    <p className="mt-2 text-sm">
-      Em breve
-    </p>
-  </div>
-
+  <p className="mt-2 text-sm text-[#F3E8D7]/70">
+    Gerenciar pedidos.
+  </p>
+</Link>
   <div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6 opacity-60">
     <h2 className="text-xl font-bold">
       Relatórios
