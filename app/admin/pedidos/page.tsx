@@ -17,7 +17,11 @@ const [filtroStatus, setFiltroStatus] =
 
 const [busca, setBusca] = useState("");
 
+const [pedidoSelecionado, setPedidoSelecionado] =
+  useState<any | null>(null);
 
+const [modalAberto, setModalAberto] =
+  useState(false);
 
 const pedidosPendentes = pedidos.filter(
   (pedido) => pedido.status === "PENDENTE"
@@ -296,10 +300,14 @@ useEffect(() => {
   <div className="flex items-center gap-3">
 
     <button
-      className="rounded-lg bg-[#C8A95B] px-4 py-2 text-sm font-semibold text-[#111111] transition hover:brightness-110"
-    >
-      Ver
-    </button>
+  onClick={() => {
+    setPedidoSelecionado(pedido);
+    setModalAberto(true);
+  }}
+  className="rounded-lg bg-[#C8A95B] px-4 py-2 text-sm font-semibold text-[#111111] transition hover:brightness-110"
+>
+  Ver
+</button>
 
     <select
     value={pedido.status}
@@ -361,7 +369,69 @@ useEffect(() => {
 
 </div>
 </div>
-      
+     {modalAberto && pedidoSelecionado && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+    <div className="w-full max-w-2xl rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-8">
+
+      <div className="mb-6 flex items-center justify-between">
+
+        <h2 className="text-2xl font-bold">
+          Detalhes do Pedido
+        </h2>
+
+        <button
+          onClick={() => {
+            setModalAberto(false);
+            setPedidoSelecionado(null);
+          }}
+          className="rounded-lg bg-red-500 px-4 py-2 font-semibold"
+        >
+          Fechar
+        </button>
+
+      </div>
+
+      <div className="space-y-4">
+
+        <p>
+          <strong>Cliente:</strong>{" "}
+          {pedidoSelecionado.nome_cliente}
+        </p>
+
+        <p>
+          <strong>Telefone:</strong>{" "}
+          {pedidoSelecionado.telefone}
+        </p>
+
+        <p>
+          <strong>Status:</strong>{" "}
+          {pedidoSelecionado.status}
+        </p>
+
+        <p>
+          <strong>Total:</strong>{" "}
+          {Number(pedidoSelecionado.total).toLocaleString(
+            "pt-BR",
+            {
+              style: "currency",
+              currency: "BRL",
+            }
+          )}
+        </p>
+
+        <p>
+          <strong>Data:</strong>{" "}
+          {new Date(
+            pedidoSelecionado.created_at
+          ).toLocaleString("pt-BR")}
+        </p>
+
+      </div>
+
+    </div>
+  </div>
+)} 
+
     </main>
   );
 }
