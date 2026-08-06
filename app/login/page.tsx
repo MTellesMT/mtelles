@@ -48,30 +48,30 @@ async function entrar(
 
   }
 
-  localStorage.setItem(
+  sessionStorage.setItem(
     "adminLogado",
     "true"
   );
-localStorage.setItem(
+sessionStorage.setItem(
   "adminNome",
   admin.nome
 );
 
-localStorage.setItem(
+sessionStorage.setItem(
   "adminNivel",
   admin.nivel
 );
 
-localStorage.setItem(
+sessionStorage.setItem(
   "adminId",
   String(admin.id)
 );
-  localStorage.setItem(
+  sessionStorage.setItem(
     "adminNome",
     admin.nome
   );
 
-  localStorage.setItem(
+  sessionStorage.setItem(
     "adminNivel",
     admin.nivel
   );

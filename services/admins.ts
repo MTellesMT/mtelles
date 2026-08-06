@@ -38,19 +38,33 @@ export async function alterarStatusAdmin(
   if (error) {
     throw error;
   }
-}export async function updateAdmin(
+}
+
+export async function updateAdmin(
   id: number,
   nome: string,
   usuario: string,
-  nivel: string
+  nivel: string,
+  senha?: string
 ) {
+  const dados: {
+    nome: string;
+    usuario: string;
+    nivel: string;
+    senha_hash?: string;
+  } = {
+    nome,
+    usuario,
+    nivel,
+  };
+
+  if (senha && senha.trim() !== "") {
+    dados.senha_hash = senha;
+  }
+
   const { error } = await supabase
     .from("usuarios_admin")
-    .update({
-      nome,
-      usuario,
-      nivel,
-    })
+    .update(dados)
     .eq("id", id);
 
   if (error) {

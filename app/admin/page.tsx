@@ -21,6 +21,40 @@ interface Admin {
 export default function AdministradoresPage() {
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [loading, setLoading] = useState(true);
+  const [adminEditando, setAdminEditando] =
+  useState<Admin | null>(null);
+
+const [nomeEditando, setNomeEditando] =
+  useState("");
+
+const [usuarioEditando, setUsuarioEditando] =
+  useState("");
+
+const [senhaEditando, setSenhaEditando] =
+  useState("");
+
+const [nivelEditando, setNivelEditando] =
+  useState("ADMIN");
+
+const [modalEditarAberto, setModalEditarAberto] =
+  useState(false);
+
+useEffect(() => {
+  const logado =
+    sessionStorage.getItem("adminLogado");
+
+  if (logado !== "true") {
+    window.location.replace("/login");
+    return;
+  }
+
+  const nivel =
+    sessionStorage.getItem("adminNivel");
+
+  if (nivel !== "MASTER") {
+    window.location.replace("/login");
+  }
+}, []);
 
   const carregarAdmins = useCallback(async () => {
     try {
@@ -86,61 +120,50 @@ export default function AdministradoresPage() {
     }
   }
 
-  async function editar(admin: Admin) {
-    const nome = prompt(
-      "Nome:",
-      admin.nome
+  function editar(admin: Admin) {
+  setAdminEditando(admin);
+
+  setNomeEditando(admin.nome);
+
+  setUsuarioEditando(admin.usuario);
+
+  setSenhaEditando("");
+
+  setNivelEditando(admin.nivel);
+
+  setModalEditarAberto(true);
+}
+async function salvarEdicao() {
+  if (!adminEditando) return;
+
+  try {
+    await updateAdmin(
+      adminEditando.id,
+      nomeEditando,
+      usuarioEditando,
+      nivelEditando,
+      senhaEditando
     );
 
-    if (!nome) return;
+    carregarAdmins();
 
-    const usuario = prompt(
-      "Usuário:",
-      admin.usuario
+    setModalEditarAberto(false);
+
+    setAdminEditando(null);
+
+    setSenhaEditando("");
+
+    alert(
+      "Colaborador atualizado."
     );
+  } catch (error) {
+    console.error(error);
 
-    if (!usuario) return;
-
-    const cargoAtual =
-      admin.nivel === "MASTER"
-        ? "Gerência"
-        : "Funcionário";
-
-    const cargo = prompt(
-      "Cargo (Gerência ou Funcionário):",
-      cargoAtual
+    alert(
+      "Erro ao atualizar."
     );
-
-    if (!cargo) return;
-
-    const nivel =
-      cargo.toLowerCase() === "gerência" ||
-      cargo.toLowerCase() === "gerencia"
-        ? "MASTER"
-        : "ADMIN";
-
-    try {
-      await updateAdmin(
-        admin.id,
-        nome,
-        usuario,
-        nivel
-      );
-
-      carregarAdmins();
-
-      alert(
-        "Colaborador atualizado."
-      );
-    } catch (error) {
-      console.error(error);
-
-      alert(
-        "Erro ao atualizar."
-      );
-    }
   }
-
+}
   return (
     <main className="min-h-screen bg-[#111111] p-8 text-white">
       <div className="mx-auto max-w-7xl">
@@ -231,6 +254,111 @@ export default function AdministradoresPage() {
 
 </div>
       </div>
+      {modalEditarAberto && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+
+    <div className="w-full max-w-lg rounded-3xl border border-[#C8A95B]/30 bg-[#181818] p-8">
+
+      <h2 className="mb-6 text-2xl font-bold text-[#C8A95B]">
+        Editar Colaborador
+      </h2>
+
+      <div className="space-y-5">
+
+        <div>
+          <label className="mb-2 block text-sm">
+            Nome
+          </label>
+
+          <input
+            value={nomeEditando}
+            onChange={(e) =>
+              setNomeEditando(e.target.value)
+            }
+            className="w-full rounded-xl bg-[#111111] p-3 outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm">
+            Usuário
+          </label>
+
+          <input
+            value={usuarioEditando}
+            onChange={(e) =>
+              setUsuarioEditando(e.target.value)
+            }
+            className="w-full rounded-xl bg-[#111111] p-3 outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm">
+            Nova senha
+          </label>
+
+          <input
+            type="password"
+            value={senhaEditando}
+            onChange={(e) =>
+              setSenhaEditando(e.target.value)
+            }
+            placeholder="Deixe em branco para manter"
+            className="w-full rounded-xl bg-[#111111] p-3 outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm">
+            Cargo
+          </label>
+
+          <select
+            value={nivelEditando}
+            onChange={(e) =>
+              setNivelEditando(e.target.value)
+            }
+            className="w-full rounded-xl bg-[#111111] p-3"
+          >
+            <option value="MASTER">
+              Gerência
+            </option>
+
+            <option value="ADMIN">
+              Funcionário
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+      <div className="mt-8 flex justify-end gap-4">
+
+        <button
+          onClick={() =>
+            setModalEditarAberto(false)
+          }
+          className="rounded-xl bg-gray-700 px-5 py-3"
+        >
+          Cancelar
+        </button>
+
+        <button
+          onClick={salvarEdicao}
+          className="rounded-xl bg-[#C8A95B] px-5 py-3 font-bold text-black"
+        >
+          Salvar
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
     </main>
   );
 }
