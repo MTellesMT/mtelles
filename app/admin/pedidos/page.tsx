@@ -12,7 +12,12 @@ export default function PedidosPage() {
 
 const [loading, setLoading] = useState(true);
 
+const [filtroStatus, setFiltroStatus] =
+  useState("TODOS");
+
 const [busca, setBusca] = useState("");
+
+
 
 const pedidosPendentes = pedidos.filter(
   (pedido) => pedido.status === "PENDENTE"
@@ -23,16 +28,22 @@ const pedidosEntregues = pedidos.filter(
 );
 
 const pedidosFiltrados = pedidos.filter((pedido) => {
-  const texto = busca.toLowerCase();
+  const texto = busca.trim().toLowerCase();
 
-  return (
+  const correspondeStatus =
+    filtroStatus === "TODOS" ||
+    pedido.status === filtroStatus;
+
+  const correspondeBusca =
+    texto === "" ||
     pedido.nome_cliente
       ?.toLowerCase()
       .includes(texto) ||
-    pedido.telefone
-      ?.toLowerCase()
-      .includes(texto)
-  );
+    String(pedido.telefone ?? "")
+      .toLowerCase()
+      .includes(texto);
+
+  return correspondeStatus && correspondeBusca;
 });
 
 const faturamento = pedidos.reduce(
@@ -86,6 +97,20 @@ useEffect(() => {
 
   </div>
 
+  <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row">
+
+  <select
+    value={filtroStatus}
+    onChange={(e) => setFiltroStatus(e.target.value)}
+    className="rounded-2xl border border-[#C8A95B]/20 bg-[#181818] px-5 py-3 text-white outline-none transition focus:border-[#C8A95B]"
+  >
+    <option value="TODOS">Todos</option>
+    <option value="PENDENTE">Pendentes</option>
+    <option value="ENVIADO">Enviados</option>
+    <option value="ENTREGUE">Entregues</option>
+    <option value="CANCELADO">Cancelados</option>
+  </select>
+
   <input
     type="text"
     placeholder="Buscar por cliente ou telefone..."
@@ -93,6 +118,8 @@ useEffect(() => {
     onChange={(e) => setBusca(e.target.value)}
     className="w-full rounded-2xl border border-[#C8A95B]/20 bg-[#181818] px-5 py-3 text-white outline-none transition focus:border-[#C8A95B] lg:w-96"
   />
+
+</div>
 
 </div>
 
@@ -189,7 +216,7 @@ useEffect(() => {
 
         </tr>
 
-      ) : pedidos.length === 0 ? (
+      ) : pedidosFiltrados.length === 0 ? (
 
         <tr>
 
@@ -204,7 +231,7 @@ useEffect(() => {
 
       ) : (
 
-        [...pedidosFiltrados]
+ [...pedidosFiltrados]
   .sort(
     (a, b) =>
       new Date(b.created_at).getTime() -
