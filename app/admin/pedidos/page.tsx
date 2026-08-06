@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import AcessoRestritoPage from "@/components/admin/AcessoRestritoPage";
+
 import {
   atualizarStatusPedido,
   getItensPedido,
@@ -26,7 +28,10 @@ const [modalAberto, setModalAberto] =
 
 const [itensPedido, setItensPedido] =
   useState<any[]>([]);
-  
+
+const [acessoPermitido, setAcessoPermitido] =
+  useState<boolean | null>(null);
+
 const pedidosPendentes = pedidos.filter(
   (pedido) => pedido.status === "PENDENTE"
 );
@@ -58,6 +63,28 @@ const faturamento = pedidos.reduce(
   (total, pedido) => total + Number(pedido.total),
   0
 );
+useEffect(() => {
+  const logado =
+    sessionStorage.getItem("adminLogado");
+
+  if (logado !== "true") {
+    window.location.replace("/login");
+    return;
+  }
+
+  const nivel =
+    sessionStorage.getItem("adminNivel");
+
+  if (nivel === "MASTER") {
+    setAcessoPermitido(true);
+  } else {
+    setAcessoPermitido(false);
+
+    setTimeout(() => {
+      window.location.replace("/admin");
+    }, 3000);
+  }
+}, []);
 
 const carregarPedidos = useCallback(async () => {
 
@@ -87,7 +114,17 @@ useEffect(() => {
 
 }, [carregarPedidos]);
 
+  if (acessoPermitido === false) {
   return (
+    <AcessoRestritoPage
+      onOk={() =>
+        window.location.replace("/admin")
+      }
+    />
+  );
+}
+
+return (
     <main className="min-h-screen bg-[#111111] p-8 text-white">
       <div className="mx-auto max-w-7xl">
 
@@ -600,7 +637,6 @@ useEffect(() => {
     </div>
   </div>
 )} 
-
     </main>
   );
 }

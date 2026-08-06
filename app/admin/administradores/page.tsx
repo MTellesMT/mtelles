@@ -10,6 +10,7 @@ import {
   updateAdmin,
 } from "@/services/admins";
 
+import AcessoNegadoModal from "@/components/admin/AcessoNegadoModal";
 interface Admin {
   id: number;
   nome: string;
@@ -56,6 +57,9 @@ const [nivelEditando, setNivelEditando] =
       setLoading(false);
     }
   }, []);
+  
+const [mostrarAcessoNegado, setMostrarAcessoNegado] =
+  useState(false);
 
   useEffect(() => {
   const logado =
@@ -70,16 +74,14 @@ const [nivelEditando, setNivelEditando] =
   }
 
   if (nivel !== "MASTER") {
-    alert(
-  "Você não possui permissão para acessar esta área."
-);
+  setMostrarAcessoNegado(true);
 
-setTimeout(() => {
-  window.location.replace("/admin");
-}, 100);
+  setTimeout(() => {
+    window.location.replace("/admin");
+  }, 3000);
 
-return;
-  }
+  return;
+}
 
   carregarAdmins();
 }, [carregarAdmins]);
@@ -408,6 +410,12 @@ async function salvarEdicao() {
 
   </div>
 )}
+<AcessoNegadoModal
+  aberto={mostrarAcessoNegado}
+  onOk={() => {
+    window.location.replace("/admin");
+  }}
+/>
     </main>
   );
 }

@@ -47,13 +47,6 @@ useEffect(() => {
     window.location.replace("/login");
     return;
   }
-
-  const nivel =
-    sessionStorage.getItem("adminNivel");
-
-  if (nivel !== "MASTER") {
-    window.location.replace("/login");
-  }
 }, []);
 
   const carregarAdmins = useCallback(async () => {
