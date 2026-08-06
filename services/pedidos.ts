@@ -90,13 +90,11 @@ export async function atualizarStatusPedido(
   id: number,
   status: string
 ) {
-  const { error } =
-    await supabase
-      .from(PEDIDOS)
-      .update({
-        status,
-      })
-      .eq("id", id);
+  const { data, error } = await supabase
+    .from(PEDIDOS)
+    .update({ status })
+    .eq("id", id)
+    .select();
 
   if (error) throw error;
 }

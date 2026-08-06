@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import {
+  atualizarStatusPedido,
   getPedidos,
 } from "@/services/pedidos";
 
@@ -115,12 +116,14 @@ useEffect(() => {
     </p>
 
     <h2 className="mt-3 text-4xl font-black text-blue-400">
-      {pedidosEntregues.length}
-    </h2>
+  {pedidosEntregues.length}
+</h2>
 
-  </div>
+</div>
+
+</div>
+
 <div className="overflow-hidden rounded-3xl border border-[#C8A95B]/20 bg-[#181818]">
-
   <table className="w-full">
 
     <thead className="bg-[#C8A95B]/10">
@@ -134,7 +137,9 @@ useEffect(() => {
         <th className="p-4 text-left">Total</th>
 
         <th className="p-4 text-left">Status</th>
-
+<th className="p-4 text-left">
+  Ações
+</th>
       </tr>
 
     </thead>
@@ -176,28 +181,86 @@ useEffect(() => {
             className="border-t border-[#C8A95B]/10"
           >
 
-            <td className="p-4">
-              {pedido.nome_cliente}
-            </td>
+<td className="p-4">
+  {pedido.nome_cliente}
+</td>
 
-            <td className="p-4">
-              {pedido.telefone}
-            </td>
+<td className="p-4">
+  {pedido.telefone}
+</td>
 
-            <td className="p-4">
-              {Number(pedido.total).toLocaleString(
-                "pt-BR",
-                {
-                  style: "currency",
-                  currency: "BRL",
-                }
-              )}
-            </td>
+<td className="p-4">
+  {Number(pedido.total).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  })}
+</td>
 
-            <td className="p-4">
-              {pedido.status}
-            </td>
+<td className="p-4">
+  <span
+    className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${
+      pedido.status === "PENDENTE"
+        ? "bg-yellow-500/20 text-yellow-400"
+        : pedido.status === "ENVIADO"
+        ? "bg-purple-500/20 text-purple-400"
+        : pedido.status === "ENTREGUE"
+        ? "bg-green-500/20 text-green-400"
+        : pedido.status === "CANCELADO"
+        ? "bg-red-500/20 text-red-400"
+        : "bg-gray-500/20 text-gray-300"
+    }`}
+  >
+    {pedido.status}
+  </span>
+</td>     
+<td className="p-4">
 
+  <select
+    value={pedido.status}
+   onChange={async (e) => {
+
+  console.log("Alterando:", pedido.id, e.target.value);
+
+  try {
+
+    await atualizarStatusPedido(
+      pedido.id,
+      e.target.value
+    );
+
+    carregarPedidos();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Não foi possível atualizar o status.");
+
+  }
+
+}}
+    className="rounded-lg border border-[#C8A95B]/30 bg-[#181818] px-3 py-2 text-sm text-white outline-none"
+  >
+
+    <option value="PENDENTE">
+      PENDENTE
+    </option>
+
+    <option value="ENVIADO">
+      ENVIADO
+    </option>
+
+    <option value="ENTREGUE">
+      ENTREGUE
+    </option>
+
+    <option value="CANCELADO">
+      CANCELADO
+    </option>
+
+  </select>
+
+</td>
           </tr>
 
         ))
@@ -210,7 +273,7 @@ useEffect(() => {
 
 </div>
 </div>
-      </div>
+      
     </main>
   );
 }
