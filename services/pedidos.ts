@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-
+import { registrarSaida } from "@/services/estoque";
 const PEDIDOS = "pedidos";
 const ITENS = "pedido_itens";
 
@@ -97,15 +97,64 @@ export async function getItensPedido(
   );
 }
 
+export async function getItensPedidoEstoque(
+  pedidoId: number
+) {
+  const { data, error } = await supabase
+    .from(ITENS)
+    .select(`
+      produto_id,
+      nome_produto,
+      quantidade
+    `)
+    .eq("pedido_id", pedidoId);
+
+  if (error) throw error;
+
+  return data ?? [];
+}
 export async function atualizarStatusPedido(
   id: number,
   status: string
 ) {
-  const { data, error } = await supabase
+  const { data: pedidoAtual, error: erroPedido } =
+    await supabase
+      .from(PEDIDOS)
+      .select("status")
+      .eq("id", id)
+      .single();
+
+  if (erroPedido) throw erroPedido;
+
+  if (
+    pedidoAtual.status === "ENTREGUE" &&
+    status === "ENTREGUE"
+  ) {
+    return;
+  }
+
+  const { error } = await supabase
     .from(PEDIDOS)
     .update({ status })
-    .eq("id", id)
-    .select();
+    .eq("id", id);
 
   if (error) throw error;
+
+  if (status !== "ENTREGUE") {
+    return;
+  }
+
+  const itens =
+    await getItensPedidoEstoque(id);
+
+  for (const item of itens) {
+    await registrarSaida({
+      produto_id: item.produto_id,
+      tipo: "SAIDA",
+      quantidade: item.quantidade,
+      motivo: "Venda",
+      referencia: `Pedido #${id}`,
+      observacao: item.nome_produto,
+    });
+  }
 }
