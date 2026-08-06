@@ -161,6 +161,8 @@ useEffect(() => {
         <th className="p-4 text-left">Cliente</th>
 
         <th className="p-4 text-left">Telefone</th>
+        
+<th className="p-4 text-left">Data</th>
 
         <th className="p-4 text-left">Total</th>
 
@@ -215,6 +217,21 @@ useEffect(() => {
 
 <td className="p-4">
   {pedido.telefone}
+</td>
+
+<td className="p-4">
+  <div className="flex flex-col">
+    <span>
+      {new Date(pedido.created_at).toLocaleDateString("pt-BR")}
+    </span>
+
+    <span className="text-xs text-[#F3E8D7]/60">
+      {new Date(pedido.created_at).toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}
+    </span>
+  </div>
 </td>
 
 <td className="p-4">
