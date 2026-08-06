@@ -12,6 +12,8 @@ export default function PedidosPage() {
 
 const [loading, setLoading] = useState(true);
 
+const [busca, setBusca] = useState("");
+
 const pedidosPendentes = pedidos.filter(
   (pedido) => pedido.status === "PENDENTE"
 );
@@ -19,6 +21,19 @@ const pedidosPendentes = pedidos.filter(
 const pedidosEntregues = pedidos.filter(
   (pedido) => pedido.status === "ENTREGUE"
 );
+
+const pedidosFiltrados = pedidos.filter((pedido) => {
+  const texto = busca.toLowerCase();
+
+  return (
+    pedido.nome_cliente
+      ?.toLowerCase()
+      .includes(texto) ||
+    pedido.telefone
+      ?.toLowerCase()
+      .includes(texto)
+  );
+});
 
 const faturamento = pedidos.reduce(
   (total, pedido) => total + Number(pedido.total),
@@ -57,17 +72,30 @@ useEffect(() => {
     <main className="min-h-screen bg-[#111111] p-8 text-white">
       <div className="mx-auto max-w-7xl">
 
-        <div className="mb-10">
+       <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
 
-          <h1 className="text-4xl font-black">
-            Pedidos
-          </h1>
+  <div>
 
-          <p className="mt-2 text-[#F3E8D7]/70">
-            Gerencie todos os pedidos da MTelles.
-          </p>
+    <h1 className="text-4xl font-black">
+      Pedidos
+    </h1>
 
-        </div>
+    <p className="mt-2 text-[#F3E8D7]/70">
+      Gerencie todos os pedidos da MTelles.
+    </p>
+
+  </div>
+
+  <input
+    type="text"
+    placeholder="Buscar por cliente ou telefone..."
+    value={busca}
+    onChange={(e) => setBusca(e.target.value)}
+    className="w-full rounded-2xl border border-[#C8A95B]/20 bg-[#181818] px-5 py-3 text-white outline-none transition focus:border-[#C8A95B] lg:w-96"
+  />
+
+</div>
+
 <div className="mb-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
 
   <div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6">
@@ -174,7 +202,7 @@ useEffect(() => {
 
       ) : (
 
-        pedidos.map((pedido) => (
+        pedidosFiltrados.map((pedido) => (
 
           <tr
             key={pedido.id}
