@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import { criarPedido } from "@/services/pedidos";
-
 import { useCart } from "./CartContext";
 
 const whatsapp = "5521966682941";
@@ -24,15 +26,29 @@ export default function CartDrawer() {
   const [enviando, setEnviando] =
     useState(false);
 
+  const [
+    mostrarProdutos,
+    setMostrarProdutos,
+  ] = useState(false);
+
   useEffect(() => {
-    if (aberto) {
-      document.body.style.overflow =
-        "hidden";
-    } else {
+    if (!aberto) {
+      setMostrarProdutos(false);
       document.body.style.overflow = "";
+
+      return;
     }
 
+    document.body.style.overflow =
+      "hidden";
+
+    const timer =
+      window.setTimeout(() => {
+        setMostrarProdutos(true);
+      }, 50);
+
     return () => {
+      window.clearTimeout(timer);
       document.body.style.overflow = "";
     };
   }, [aberto]);
@@ -136,12 +152,12 @@ ${total.toLocaleString("pt-BR", {
         }))
       );
 
-      const url = `https://wa.me/${whatsapp}?text=${mensagem}`;
+      const url =
+        `https://wa.me/${whatsapp}?text=${mensagem}`;
 
       window.location.href = url;
 
       limparCarrinho();
-
       fecharCarrinho();
     } catch (error) {
       console.error(
@@ -197,13 +213,13 @@ ${total.toLocaleString("pt-BR", {
             type="button"
             onClick={fecharCarrinho}
             aria-label="Fechar carrinho"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-3xl text-[#C8A95B] transition-colors hover:bg-[#C8A95B]/10"
+            className="flex h-10 w-10 touch-manipulation items-center justify-center rounded-full text-3xl text-[#C8A95B] transition-colors hover:bg-[#C8A95B]/10"
           >
             ×
           </button>
         </div>
 
-        {/* PRODUTOS */}
+        {/* ÁREA DOS PRODUTOS */}
 
         <div
           className="min-h-0 flex-1 overflow-y-auto p-4"
@@ -212,7 +228,17 @@ ${total.toLocaleString("pt-BR", {
               "touch",
           }}
         >
-          {itens.length === 0 ? (
+          {!mostrarProdutos ? (
+            <div className="flex h-full min-h-40 items-center justify-center">
+              <div className="text-center">
+                <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-[#C8A95B]/25 border-t-[#C8A95B]" />
+
+                <p className="mt-3 text-sm text-[#F3E8D7]/50">
+                  Carregando carrinho...
+                </p>
+              </div>
+            </div>
+          ) : itens.length === 0 ? (
             <div className="mt-24 text-center">
               <div className="text-6xl">
                 🛒
@@ -295,7 +321,7 @@ ${total.toLocaleString("pt-BR", {
                       </p>
                     </div>
 
-                    {/* COR + TAMANHO */}
+                    {/* COR E TAMANHO */}
 
                     <div className="mt-3 grid grid-cols-2 gap-2">
                       <div className="rounded-xl border border-[#C8A95B]/15 bg-[#111111] px-3 py-2">
@@ -419,7 +445,7 @@ ${total.toLocaleString("pt-BR", {
           )}
         </div>
 
-        {/* RESUMO COMPACTO */}
+        {/* RESUMO */}
 
         {itens.length > 0 && (
           <div className="shrink-0 border-t border-[#C8A95B]/20 bg-[#0f0f0f] px-5 py-3">
