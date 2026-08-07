@@ -15,10 +15,6 @@ export interface Product {
 
   preco: number;
 
-  material: string;
-
-  altura_do_calcanhar: string;
-
   tamanhos: string;
 
   cores: string;

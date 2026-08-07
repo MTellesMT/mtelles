@@ -65,10 +65,19 @@ export async function updateProduct(
   return data?.[0] ?? null;
 }
 export async function deleteProduct(id: number) {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from(TABLE)
     .delete()
-    .eq("id", id);
+    .eq("id", id)
+    .select();
 
-  if (error) throw error;
+  console.log("DELETE ID:", id);
+  console.log("DELETE RETORNO:", data);
+  console.log("DELETE ERRO:", error);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
 }

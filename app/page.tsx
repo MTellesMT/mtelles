@@ -379,10 +379,7 @@ export default function Home() {
               produto.descricao
             );
 
-          const material =
-            normalizar(
-              produto.material
-            );
+        
 
           const coresTexto =
             normalizar(
@@ -411,9 +408,7 @@ export default function Home() {
             descricao.includes(
               pesquisa
             ) ||
-            material.includes(
-              pesquisa
-            ) ||
+            
             coresTexto.includes(
               pesquisa
             ) ||

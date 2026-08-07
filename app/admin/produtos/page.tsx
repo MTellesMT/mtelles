@@ -44,19 +44,38 @@ export default function ProdutosPage() {
     carregarProdutos();
   }, [carregarProdutos]);
 
-  async function excluirProduto(id: number) {
-    if (
-      !confirm(
-        "Deseja realmente excluir este produto?"
-      )
-    ) {
-      return;
-    }
+ async function excluirProduto(id: number) {
+  if (
+    !confirm(
+      "Deseja realmente excluir este produto?"
+    )
+  ) {
+    return;
+  }
+
+  try {
 
     await deleteProduct(id);
 
     carregarProdutos();
+
+  } catch(error){
+
+    console.error(
+      "ERRO AO EXCLUIR:",
+      error
+    );
+
+    alert(
+      JSON.stringify(
+        error,
+        null,
+        2
+      )
+    );
+
   }
+}
 
   function editarProduto(produto: Product) {
     setProdutoEmEdicao(produto);

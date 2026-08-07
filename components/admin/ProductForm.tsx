@@ -12,546 +12,1052 @@ import {
   updateProduct,
 } from "@/services/products";
 
+import {
+  categoriasProduto,
+  marcasProduto,
+  coresProduto,
+  tamanhosProduto,
+} from "@/data/productOptions";
+
 import { Product } from "@/types/product";
 
+
 interface ProductFormProps {
+
   onProductCreated?: () => void;
 
   productToEdit?: Product | null;
 
   onCancelEdit?: () => void;
+
 }
 
+
+
 export default function ProductForm({
+
   onProductCreated,
+
   productToEdit,
+
   onCancelEdit,
+
 }: ProductFormProps) {
-  const [loading, setLoading] =
+
+
+  const [loading,setLoading] =
     useState(false);
 
-  const [nome, setNome] =
+
+
+  const [nome,setNome] =
     useState("");
 
-  const [marca, setMarca] =
+  const [marca,setMarca] =
     useState("");
 
-  const [codigo, setCodigo] =
+  const [novaMarca,setNovaMarca] =
     useState("");
 
-  const [categoria, setCategoria] =
+  const [categoria,setCategoria] =
     useState("");
 
-  const [descricao, setDescricao] =
+  const [novaCategoria,setNovaCategoria] =
     useState("");
 
-  const [preco, setPreco] =
+    const [cor, setCor] =
+  useState("");
+
+const [tamanho, setTamanho] =
+  useState("");
+
+const [novaCor, setNovaCor] =
+  useState("");
+
+const [novoTamanho, setNovoTamanho] =
+  useState("");
+
+const [mostrarNovaCor, setMostrarNovaCor] =
+  useState(false);
+
+const [mostrarNovoTamanho, setMostrarNovoTamanho] =
+  useState(false);
+
+
+const [listaCores, setListaCores] =
+  useState<string[]>(coresProduto);
+
+
+const [listaTamanhos, setListaTamanhos] =
+  useState<string[]>(tamanhosProduto);
+
+  const [codigo,setCodigo] =
     useState("");
 
-  const [material, setMaterial] =
+  const [descricao,setDescricao] =
     useState("");
 
-  const [altura, setAltura] =
+  const [preco,setPreco] =
     useState("");
 
-  const [estoque, setEstoque] =
+  const [estoque,setEstoque] =
     useState("");
 
-  const [cores, setCores] =
+  const [cores,setCores] =
     useState("");
 
-  const [tamanhos, setTamanhos] =
+  const [tamanhos,setTamanhos] =
     useState("");
 
-  // GALERIA DE IMAGENS
 
-  const [imagens, setImagens] =
+  const [mostrarNovaMarca,setMostrarNovaMarca] =
+    useState(false);
+
+  const [mostrarNovaCategoria,setMostrarNovaCategoria] =
+    useState(false);
+
+
+
+  const [listaMarcas,setListaMarcas] =
+    useState<string[]>(marcasProduto);
+
+
+  const [listaCategorias,setListaCategorias] =
+    useState<string[]>(categoriasProduto);
+
+
+
+  const [imagens,setImagens] =
     useState<string[]>([]);
 
-  const [ativo, setAtivo] =
+
+
+  const [ativo,setAtivo] =
     useState(true);
 
-  const [destaque, setDestaque] =
+
+  const [destaque,setDestaque] =
     useState(false);
 
-  const [
-    maisVendido,
-    setMaisVendido,
-  ] = useState(false);
 
-  useEffect(() => {
-    if (!productToEdit) {
+  const [maisVendido,setMaisVendido] =
+    useState(false);
+
+
+
+  useEffect(()=>{
+
+
+    if(!productToEdit){
+
       return;
+
     }
+
 
     setNome(productToEdit.nome);
 
     setMarca(productToEdit.marca);
 
+    setCategoria(productToEdit.categoria);
+
     setCodigo(productToEdit.codigo);
 
-    setCategoria(
-      productToEdit.categoria
-    );
+    setDescricao(productToEdit.descricao);
 
-    setDescricao(
-      productToEdit.descricao
-    );
+    setPreco(String(productToEdit.preco));
 
-    setPreco(
-      String(productToEdit.preco)
-    );
+    setEstoque(String(productToEdit.estoque));
 
-    setMaterial(
-      productToEdit.material
-    );
+    setCor(productToEdit.cores);
 
-    setAltura(
-      productToEdit.altura_do_calcanhar
-    );
+    setTamanho(productToEdit.tamanhos);
 
-    setEstoque(
-      String(productToEdit.estoque)
-    );
 
-    setCores(productToEdit.cores);
+    let galeria:string[]=[];
 
-    setTamanhos(
-      productToEdit.tamanhos
-    );
 
-    let galeria: string[] = [];
+    try{
 
-    try {
       galeria =
         productToEdit.galeria
-          ? JSON.parse(
-              productToEdit.galeria
-            )
-          : [];
-    } catch {
-      galeria = [];
+        ? JSON.parse(productToEdit.galeria)
+        : [];
+
+
+    }catch{
+
+      galeria=[];
+
     }
 
+
+
     setImagens([
+
       productToEdit.imagem_principal,
+
       ...galeria,
+
     ]);
+
+
 
     setAtivo(productToEdit.ativo);
 
-    setDestaque(
-      productToEdit.em_destaque
-    );
+    setDestaque(productToEdit.em_destaque);
 
     setMaisVendido(
-      productToEdit.mais_vendido ??
-        false
+      productToEdit.mais_vendido ?? false
     );
-  }, [productToEdit]);
 
-  async function salvarProduto() {
-    if (!nome || !preco) {
+
+  },[productToEdit]);
+
+
+
+
+  function adicionarMarca(){
+
+
+    const valor =
+      novaMarca.trim();
+
+
+
+    if(!valor){
+
+      return;
+
+    }
+
+
+
+    setListaMarcas(
+      (lista)=>
+      [
+        ...lista,
+        valor
+      ]
+    );
+
+
+
+    setMarca(valor);
+
+
+    setNovaMarca("");
+
+    setMostrarNovaMarca(false);
+
+
+  }
+
+
+
+
+  function adicionarCategoria(){
+
+
+    const valor =
+      novaCategoria.trim();
+
+
+
+    if(!valor){
+
+      return;
+
+    }
+
+
+
+    setListaCategorias(
+      (lista)=>
+      [
+        ...lista,
+        valor
+      ]
+    );
+
+
+
+    setCategoria(valor);
+
+
+    setNovaCategoria("");
+
+    setMostrarNovaCategoria(false);
+
+
+  }
+
+function adicionarCor(){
+
+  const valor =
+    novaCor.trim();
+
+
+  if(!valor){
+    return;
+  }
+
+
+  setListaCores(
+    (lista:string[]) =>
+      [
+        ...lista,
+        valor,
+      ]
+  );
+
+
+  setCor(valor);
+
+
+  setNovaCor("");
+
+  setMostrarNovaCor(false);
+
+}
+
+
+
+function adicionarTamanho(){
+
+  const valor =
+    novoTamanho.trim();
+
+
+  if(!valor){
+    return;
+  }
+
+
+  setListaTamanhos(
+    (lista:string[]) =>
+      [
+        ...lista,
+        valor,
+      ]
+  );
+
+
+  setTamanho(valor);
+
+
+  setNovoTamanho("");
+
+  setMostrarNovoTamanho(false);
+
+}
+
+
+  async function salvarProduto(){
+
+
+    if(!nome || !preco){
+
       alert(
         "Preencha nome e preço."
       );
 
       return;
+
     }
 
-    if (imagens.length === 0) {
+
+
+    if(imagens.length===0){
+
       alert(
         "Selecione pelo menos uma imagem."
       );
 
       return;
+
     }
 
-    try {
+
+
+    try{
+
+
       setLoading(true);
 
-      const dadosProduto = {
+
+
+      const dadosProduto={
+
+
         nome,
+
         marca,
+
         codigo,
+
         categoria,
+
         descricao,
 
-        preco: Number(preco),
 
-        material,
+        preco:Number(preco),
 
-        altura_do_calcanhar:
-          altura,
 
-        tamanhos,
-        cores,
+        estoque:Number(estoque),
+
+
+        cores: cor,
+
+        tamanhos: tamanho,
+
 
         imagem_principal:
           imagens[0],
 
-        galeria: JSON.stringify(
-          imagens.slice(1)
-        ),
 
-        em_destaque: destaque,
+        galeria:
+          JSON.stringify(
+            imagens.slice(1)
+          ),
 
-        mais_vendido: maisVendido,
+
+        em_destaque:
+          destaque,
+
+
+        mais_vendido:
+          maisVendido,
+
 
         ativo,
 
-        estoque: Number(estoque),
+
       };
 
-      if (productToEdit) {
-        console.log(
-          "ID DO PRODUTO:",
-          productToEdit.id
-        );
 
-        console.log(
-          "PRODUTO:",
-          productToEdit
-        );
+
+      if(productToEdit){
+
 
         await updateProduct(
           productToEdit.id,
           dadosProduto
         );
-      } else {
+
+
+      }else{
+
+
         await createProduct(
           dadosProduto
         );
+
+
       }
 
+
       setNome("");
+
       setMarca("");
-      setCodigo("");
+
       setCategoria("");
+
+      setCodigo("");
+
       setDescricao("");
+
       setPreco("");
-      setMaterial("");
-      setAltura("");
+
       setEstoque("");
+
       setCores("");
+
       setTamanhos("");
 
       setImagens([]);
 
-      setAtivo(true);
 
-      setDestaque(false);
 
-      setMaisVendido(false);
+      if(onProductCreated){
 
-      if (onProductCreated) {
         await onProductCreated();
+
       }
+
+
 
       alert(
         productToEdit
-          ? "Produto atualizado com sucesso!"
-          : "Produto cadastrado com sucesso!"
+        ? "Produto atualizado com sucesso!"
+        : "Produto cadastrado com sucesso!"
       );
 
-      if (
-        productToEdit &&
-        onCancelEdit
-      ) {
-        onCancelEdit();
-      }
-    } catch (error) {
-      console.error(
-        "ERRO COMPLETO:",
-        error
+
+
+    }catch(error){
+
+
+      console.error(error);
+
+
+      alert(
+        "Erro ao salvar produto."
       );
 
-      if (
-        error instanceof Error
-      ) {
-        alert(error.message);
-      } else {
-        alert(
-          JSON.stringify(
-            error,
-            null,
-            2
-          )
-        );
-      }
-    } finally {
+
+    }finally{
+
+
       setLoading(false);
-    }
-  }
 
-  return (
+
+    }
+
+
+  }
+    return (
+
     <div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-8">
+
+
       <h2 className="mb-8 text-3xl font-bold">
+
         {productToEdit
           ? "Editar Produto"
           : "Novo Produto"}
+
       </h2>
 
+
+
       <div className="grid gap-6 md:grid-cols-2">
+
+
+
         <div>
+
           <label className="mb-2 block">
             Nome
           </label>
 
+
           <input
             value={nome}
-            onChange={(e) =>
-              setNome(
-                e.target.value
-              )
+            onChange={(e)=>
+              setNome(e.target.value)
             }
             className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
           />
+
         </div>
 
+
+
+
+
         <div>
+
           <label className="mb-2 block">
             Marca
           </label>
 
-          <input
+
+          <select
+
             value={marca}
-            onChange={(e) =>
-              setMarca(
-                e.target.value
-              )
-            }
+
+            onChange={(e)=>{
+
+              const valor =
+                e.target.value;
+
+
+              if(valor==="__nova__"){
+
+                setMostrarNovaMarca(true);
+                setMarca("");
+
+                return;
+
+              }
+
+
+              setMarca(valor);
+
+            }}
+
             className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
-          />
+
+          >
+
+
+            <option value="">
+              Selecione uma marca
+            </option>
+
+
+            {listaMarcas.map(
+              (item)=>(
+                <option
+                  key={item}
+                  value={item}
+                >
+                  {item}
+                </option>
+              )
+            )}
+
+
+            <option value="__nova__">
+              Criar nova marca
+            </option>
+
+
+          </select>
+
+
+
+          {mostrarNovaMarca && (
+
+            <div className="mt-3">
+
+              <input
+
+                value={novaMarca}
+
+                onChange={(e)=>
+                  setNovaMarca(
+                    e.target.value
+                  )
+                }
+
+                placeholder="Digite a nova marca"
+
+                className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
+
+              />
+
+
+              <button
+
+                type="button"
+
+                onClick={adicionarMarca}
+
+                className="mt-3 rounded-xl bg-[#C8A95B] px-5 py-3 text-[#111]"
+
+              >
+
+                Salvar marca
+
+              </button>
+
+
+            </div>
+
+          )}
+
         </div>
 
+
+
+
+
         <div>
+
           <label className="mb-2 block">
             Código
           </label>
 
+
           <input
+
             value={codigo}
-            onChange={(e) =>
+
+            onChange={(e)=>
               setCodigo(
                 e.target.value
               )
             }
+
             className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
+
           />
+
         </div>
 
+
+
+
+
         <div>
+
           <label className="mb-2 block">
             Categoria
           </label>
 
-          <input
+
+          <select
+
             value={categoria}
-            onChange={(e) =>
-              setCategoria(
-                e.target.value
-              )
-            }
+
+            onChange={(e)=>{
+
+              const valor =
+                e.target.value;
+
+
+              if(valor==="__nova__"){
+
+                setMostrarNovaCategoria(true);
+                setCategoria("");
+
+                return;
+
+              }
+
+
+              setCategoria(valor);
+
+            }}
+
             className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
-          />
+
+          >
+
+
+            <option value="">
+              Selecione uma categoria
+            </option>
+
+
+            {listaCategorias.map(
+              (item)=>(
+                <option
+                  key={item}
+                  value={item}
+                >
+                  {item}
+                </option>
+              )
+            )}
+
+
+            <option value="__nova__">
+              Criar nova categoria
+            </option>
+
+
+          </select>
+
+
+
+
+          {mostrarNovaCategoria && (
+
+            <div className="mt-3">
+
+
+              <input
+
+                value={novaCategoria}
+
+                onChange={(e)=>
+                  setNovaCategoria(
+                    e.target.value
+                  )
+                }
+
+                placeholder="Digite a nova categoria"
+
+                className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
+
+              />
+
+
+
+              <button
+
+                type="button"
+
+                onClick={adicionarCategoria}
+
+                className="mt-3 rounded-xl bg-[#C8A95B] px-5 py-3 text-[#111]"
+
+              >
+
+                Salvar categoria
+
+              </button>
+
+
+            </div>
+
+          )}
+
         </div>
 
+
+
+<div>
+
+  <label className="mb-2 block">
+    Cor
+  </label>
+
+  <select
+    value={cor}
+    onChange={(e) => {
+
+      const valor = e.target.value;
+
+      if (valor === "__nova__") {
+
+        setMostrarNovaCor(true);
+        setCor("");
+
+        return;
+      }
+
+      setCor(valor);
+
+    }}
+    className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
+  >
+
+    <option value="">
+      Selecione uma cor
+    </option>
+
+    {listaCores.map((item: string) => (
+
+      <option
+        key={item}
+        value={item}
+      >
+        {item}
+      </option>
+
+    ))}
+
+    <option value="__nova__">
+      Criar nova cor
+    </option>
+
+  </select>
+
+
+  {mostrarNovaCor && (
+
+    <div className="mt-3">
+
+      <input
+        value={novaCor}
+        onChange={(e) =>
+          setNovaCor(e.target.value)
+        }
+        placeholder="Digite a nova cor"
+        className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
+      />
+
+
+      <button
+        type="button"
+        onClick={adicionarCor}
+        className="mt-3 rounded-xl bg-[#C8A95B] px-5 py-3 text-[#111]"
+      >
+        Salvar cor
+      </button>
+
+    </div>
+
+  )}
+
+</div>
+
+
+<div>
+
+  <label className="mb-2 block">
+    Tamanho
+  </label>
+
+
+  <select
+    value={tamanho}
+    onChange={(e) => {
+
+      const valor = e.target.value;
+
+      if (valor === "__novo__") {
+
+        setMostrarNovoTamanho(true);
+        setTamanho("");
+
+        return;
+      }
+
+      setTamanho(valor);
+
+    }}
+    className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
+  >
+
+    <option value="">
+      Selecione um tamanho
+    </option>
+
+
+    {listaTamanhos.map((item: string) => (
+
+      <option
+        key={item}
+        value={item}
+      >
+        {item}
+      </option>
+
+    ))}
+
+
+    <option value="__novo__">
+      Criar novo tamanho
+    </option>
+
+
+  </select>
+
+
+  {mostrarNovoTamanho && (
+
+    <div className="mt-3">
+
+      <input
+        value={novoTamanho}
+        onChange={(e) =>
+          setNovoTamanho(e.target.value)
+        }
+        placeholder="Digite o novo tamanho"
+        className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
+      />
+
+
+      <button
+        type="button"
+        onClick={adicionarTamanho}
+        className="mt-3 rounded-xl bg-[#C8A95B] px-5 py-3 text-[#111]"
+      >
+        Salvar tamanho
+      </button>
+
+    </div>
+
+  )}
+
+</div>
+
         <div>
+
           <label className="mb-2 block">
             Preço
           </label>
 
+
           <input
+
             type="number"
+
             value={preco}
-            onChange={(e) =>
+
+            onChange={(e)=>
               setPreco(
                 e.target.value
               )
             }
+
             className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
+
           />
+
         </div>
 
+
+
+
+
         <div>
+
           <label className="mb-2 block">
             Estoque
           </label>
 
+
           <input
+
             type="number"
+
             value={estoque}
-            onChange={(e) =>
+
+            onChange={(e)=>
               setEstoque(
                 e.target.value
               )
             }
+
             className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
+
           />
+
         </div>
 
-        <div>
-          <label className="mb-2 block">
-            Material
-          </label>
 
-          <input
-            value={material}
-            onChange={(e) =>
-              setMaterial(
-                e.target.value
-              )
-            }
-            className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
-          />
-        </div>
 
-        <div>
-          <label className="mb-2 block">
-            Altura do salto
-          </label>
-
-          <input
-            value={altura}
-            onChange={(e) =>
-              setAltura(
-                e.target.value
-              )
-            }
-            className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block">
-            Cores
-          </label>
-
-          <input
-            value={cores}
-            onChange={(e) =>
-              setCores(
-                e.target.value
-              )
-            }
-            placeholder="Preto, Nude, Branco..."
-            className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block">
-            Tamanhos
-          </label>
-
-          <input
-            value={tamanhos}
-            onChange={(e) =>
-              setTamanhos(
-                e.target.value
-              )
-            }
-            placeholder="34,35,36..."
-            className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
-          />
-        </div>
       </div>
 
-      <div className="mt-6">
-        <label className="mb-2 block">
-          Descrição
-        </label>
 
-        <textarea
-          rows={5}
-          value={descricao}
-          onChange={(e) =>
-            setDescricao(
-              e.target.value
-            )
-          }
-          className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
-        />
-      </div>
 
       <div className="mt-8">
+
+
         <ImageUpload
-          value={imagens}
-          onChange={setImagens}
-        />
+
+  value={imagens}
+
+  onChange={setImagens}
+
+/>
+
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4">
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={ativo}
-            onChange={(e) =>
-              setAtivo(
-                e.target.checked
-              )
-            }
-          />
 
-          Produto ativo
-        </label>
 
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={destaque}
-            onChange={(e) =>
-              setDestaque(
-                e.target.checked
-              )
-            }
-          />
 
-          Produto em destaque
-        </label>
+      <button
 
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={maisVendido}
-            onChange={(e) =>
-              setMaisVendido(
-                e.target.checked
-              )
-            }
-          />
+        type="button"
 
-          Mais vendido
-        </label>
-      </div>
+        onClick={salvarProduto}
 
-      <div className="mt-10 flex gap-4">
-        <button
-          type="button"
-          onClick={salvarProduto}
-          disabled={loading}
-          className="rounded-full bg-[#C8A95B] px-8 py-4 font-semibold text-[#111111] hover:opacity-90 disabled:opacity-50"
-        >
-          {loading
-            ? "Salvando..."
-            : productToEdit
-              ? "Salvar Alterações"
-              : "Salvar Produto"}
-        </button>
+        disabled={loading}
 
-        {productToEdit && (
-          <button
-            type="button"
-            onClick={
-              onCancelEdit
-            }
-            className="rounded-full border border-[#C8A95B]/30 px-8 py-4 text-white hover:bg-[#222]"
-          >
-            Cancelar
-          </button>
-        )}
-      </div>
+        className="mt-8 rounded-xl bg-[#C8A95B] px-8 py-3 font-bold text-[#111]"
+
+      >
+
+        {loading
+          ? "Salvando..."
+          : productToEdit
+            ? "Atualizar Produto"
+            : "Cadastrar Produto"
+        }
+
+      </button>
+
+
+
     </div>
+
   );
+
 }

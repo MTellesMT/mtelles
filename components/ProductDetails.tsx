@@ -368,27 +368,7 @@ Valor: ${produto.preco.toLocaleString(
 
                 <span>{produto.codigo}</span>
               </div>
-
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-[#C8A95B]">
-                  Material:
-                </span>
-
-                <span>{produto.material}</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-[#C8A95B]">
-                  Salto:
-                </span>
-
-                <span>
-                  {
-                    produto.altura_do_calcanhar
-                  }
-                </span>
-              </div>
-
+              
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-[#C8A95B]">
                   Estoque:
