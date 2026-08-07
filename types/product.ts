@@ -29,6 +29,8 @@ export interface Product {
 
   em_destaque: boolean;
 
+  mais_vendido: boolean;
+
   ativo: boolean;
 
   estoque: number;

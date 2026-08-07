@@ -127,7 +127,7 @@ Código: ${produtoDestaque.codigo}`
 
       {/* CONTEÚDO */}
 
-      <div className="relative mx-auto grid w-full max-w-[1600px] items-center gap-10 px-5 py-10 sm:px-6 lg:min-h-[680px] lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-16">
+      <div className="relative mx-auto grid w-full max-w-[1600px] gap-10 px-5 py-10 sm:px-6 lg:min-h-[680px] lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-8 lg:py-16">
         {/* TEXTO */}
 
 <div className="min-w-0 lg:order-1">

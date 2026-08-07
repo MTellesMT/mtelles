@@ -16,6 +16,12 @@ import { Product } from "@/types/product";
 
 const OPCAO_TODAS = "Todas";
 
+type TipoOrdenacao =
+  | "recentes"
+  | "menor-preco"
+  | "maior-preco"
+  | "alfabetica";
+
 function normalizar(
   texto: string | null | undefined
 ) {
@@ -119,6 +125,14 @@ export default function Home() {
     setCorSelecionada,
   ] = useState(OPCAO_TODAS);
 
+  const [
+    ordenacao,
+    setOrdenacao,
+  ] =
+    useState<TipoOrdenacao>(
+      "recentes"
+    );
+
   useEffect(() => {
     async function carregarProdutos() {
       try {
@@ -141,6 +155,10 @@ export default function Home() {
     carregarProdutos();
   }, []);
 
+  /*
+   * PRODUTOS ATIVOS
+   */
+
   const produtosAtivos =
     useMemo(() => {
       return products.filter(
@@ -148,6 +166,27 @@ export default function Home() {
           produto.ativo
       );
     }, [products]);
+
+  /*
+   * MAIS VENDIDOS
+   *
+   * A seleção é manual através do campo
+   * mais_vendido cadastrado no produto.
+   *
+   * Apenas produtos ativos aparecem aqui.
+   */
+
+  const produtosMaisVendidos =
+    useMemo(() => {
+      return produtosAtivos.filter(
+        (produto) =>
+          produto.mais_vendido
+      );
+    }, [produtosAtivos]);
+
+  /*
+   * MARCAS DINÂMICAS
+   */
 
   const marcasDisponiveis =
     useMemo(() => {
@@ -165,6 +204,10 @@ export default function Home() {
       ];
     }, [produtosAtivos]);
 
+  /*
+   * CATEGORIAS DINÂMICAS
+   */
+
   const categoriasDisponiveis =
     useMemo(() => {
       const categorias =
@@ -180,6 +223,10 @@ export default function Home() {
         ),
       ];
     }, [produtosAtivos]);
+
+  /*
+   * CORES DINÂMICAS
+   */
 
   const coresDisponiveis =
     useMemo(() => {
@@ -198,6 +245,11 @@ export default function Home() {
         ),
       ];
     }, [produtosAtivos]);
+
+  /*
+   * GARANTE QUE UMA MARCA REMOVIDA
+   * NÃO CONTINUE SELECIONADA
+   */
 
   useEffect(() => {
     const marcaAindaExiste =
@@ -218,6 +270,11 @@ export default function Home() {
     marcasDisponiveis,
     marcaSelecionada,
   ]);
+
+  /*
+   * GARANTE QUE UMA CATEGORIA REMOVIDA
+   * NÃO CONTINUE SELECIONADA
+   */
 
   useEffect(() => {
     const categoriaAindaExiste =
@@ -241,6 +298,11 @@ export default function Home() {
     categoriaSelecionada,
   ]);
 
+  /*
+   * GARANTE QUE UMA COR REMOVIDA
+   * NÃO CONTINUE SELECIONADA
+   */
+
   useEffect(() => {
     const corAindaExiste =
       coresDisponiveis.some(
@@ -261,6 +323,10 @@ export default function Home() {
     corSelecionada,
   ]);
 
+  /*
+   * LIMPAR FILTROS
+   */
+
   function limparFiltros() {
     setBusca("");
 
@@ -276,6 +342,10 @@ export default function Home() {
       OPCAO_TODAS
     );
   }
+
+  /*
+   * FILTRAGEM DO CATÁLOGO
+   */
 
   const produtosFiltrados =
     useMemo(() => {
@@ -399,8 +469,93 @@ export default function Home() {
       corSelecionada,
     ]);
 
+  /*
+   * ORDENAÇÃO DO CATÁLOGO
+   */
+
+  const produtosOrdenados =
+    useMemo(() => {
+      const lista = [
+        ...produtosFiltrados,
+      ];
+
+      if (
+        ordenacao ===
+        "menor-preco"
+      ) {
+        return lista.sort(
+          (produtoA, produtoB) =>
+            Number(
+              produtoA.preco
+            ) -
+            Number(
+              produtoB.preco
+            )
+        );
+      }
+
+      if (
+        ordenacao ===
+        "maior-preco"
+      ) {
+        return lista.sort(
+          (produtoA, produtoB) =>
+            Number(
+              produtoB.preco
+            ) -
+            Number(
+              produtoA.preco
+            )
+        );
+      }
+
+      if (
+        ordenacao ===
+        "alfabetica"
+      ) {
+        return lista.sort(
+          (produtoA, produtoB) =>
+            produtoA.nome.localeCompare(
+              produtoB.nome,
+              "pt-BR",
+              {
+                sensitivity:
+                  "base",
+              }
+            )
+        );
+      }
+
+      /*
+       * MAIS RECENTES
+       */
+
+      return lista.sort(
+        (produtoA, produtoB) => {
+          const dataA =
+            produtoA.created_at
+              ? new Date(
+                  produtoA.created_at
+                ).getTime()
+              : produtoA.id;
+
+          const dataB =
+            produtoB.created_at
+              ? new Date(
+                  produtoB.created_at
+                ).getTime()
+              : produtoB.id;
+
+          return dataB - dataA;
+        }
+      );
+    }, [
+      produtosFiltrados,
+      ordenacao,
+    ]);
+
   const quantidadeResultados =
-    produtosFiltrados.length;
+    produtosOrdenados.length;
 
   return (
     <main className="min-h-screen bg-[#111111] text-white">
@@ -410,6 +565,73 @@ export default function Home() {
         produtos={products}
         loading={loading}
       />
+
+      {/* MAIS VENDIDOS */}
+
+      {!loading &&
+        produtosMaisVendidos.length >
+          0 && (
+          <section
+            id="mais-vendidos"
+            className="relative border-b border-[#C8A95B]/15 bg-[#151515]"
+          >
+            <div className="mx-auto w-full max-w-[1700px] px-4 py-14 sm:px-6 sm:py-20">
+              {/* CABEÇALHO */}
+
+              <header className="mb-10 flex flex-col gap-5 sm:mb-12 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C8A95B] sm:text-sm sm:tracking-[0.35em]">
+                    Os favoritos
+                  </p>
+
+                  <h2 className="mt-4 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
+                    Mais vendidos
+                  </h2>
+
+                  <p className="mt-4 max-w-2xl leading-7 text-[#F3E8D7]/60">
+                    Conheça os modelos que
+                    estão entre os favoritos
+                    da MTelles.
+                  </p>
+                </div>
+
+                <a
+                  href="#colecao"
+                  className="inline-flex w-fit items-center justify-center rounded-full border border-[#C8A95B]/30 px-6 py-3 text-sm font-bold text-[#C8A95B] transition hover:bg-[#C8A95B] hover:text-[#111111]"
+                >
+                  Ver coleção completa
+                </a>
+              </header>
+
+              {/* PRODUTOS */}
+
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {produtosMaisVendidos.map(
+                  (produto) => (
+                    <div
+                      key={
+                        produto.id
+                      }
+                      className="relative min-w-0"
+                    >
+                      {/* SELO */}
+
+                      <div className="pointer-events-none absolute left-4 top-4 z-20 rounded-full border border-[#C8A95B]/40 bg-[#111111]/90 px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-[#C8A95B] shadow-lg backdrop-blur-md">
+                        Mais vendido
+                      </div>
+
+                      <ProductCard
+                        produto={
+                          produto
+                        }
+                      />
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          </section>
+        )}
 
       {/* CATÁLOGO */}
 
@@ -490,7 +712,7 @@ export default function Home() {
                 <div className="flex min-h-80 items-center justify-center rounded-3xl border border-[#C8A95B]/15 bg-[#181818] px-6 text-center text-lg text-[#F3E8D7]/60">
                   Carregando produtos...
                 </div>
-              ) : produtosFiltrados.length >
+              ) : produtosOrdenados.length >
                 0 ? (
                 <>
                   {/* CABEÇALHO DOS RESULTADOS */}
@@ -514,7 +736,18 @@ export default function Home() {
 
                     <select
                       aria-label="Ordenar produtos"
-                      defaultValue="recentes"
+                      value={
+                        ordenacao
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        setOrdenacao(
+                          event
+                            .target
+                            .value as TipoOrdenacao
+                        )
+                      }
                       className="w-full rounded-xl border border-[#C8A95B]/20 bg-[#181818] px-4 py-3 text-sm text-white outline-none transition focus:border-[#C8A95B] sm:w-auto"
                     >
                       <option value="recentes">
@@ -538,7 +771,7 @@ export default function Home() {
                   {/* GRID DOS PRODUTOS */}
 
                   <div className="relative grid min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                    {produtosFiltrados.map(
+                    {produtosOrdenados.map(
                       (produto) => (
                         <div
                           key={
