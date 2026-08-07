@@ -167,13 +167,18 @@ ${total.toLocaleString("pt-BR", {
 
   return (
     <>
+      {/* FUNDO */}
+
       <div
         onClick={fecharCarrinho}
-        className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 z-[90] bg-black/60"
       />
+
+      {/* CARRINHO */}
 
       <aside className="fixed right-0 top-0 z-[100] flex h-dvh w-full max-w-md flex-col overflow-hidden border-l border-[#C8A95B]/20 bg-[#111111] shadow-2xl">
         {/* CABEÇALHO */}
+
         <div className="flex shrink-0 items-center justify-between border-b border-[#C8A95B]/20 px-6 py-4">
           <div>
             <h2 className="text-2xl font-bold text-white">
@@ -192,14 +197,21 @@ ${total.toLocaleString("pt-BR", {
             type="button"
             onClick={fecharCarrinho}
             aria-label="Fechar carrinho"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-3xl text-[#C8A95B] transition hover:bg-[#C8A95B]/10 hover:scale-110"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-3xl text-[#C8A95B] transition-colors hover:bg-[#C8A95B]/10"
           >
             ×
           </button>
         </div>
 
         {/* PRODUTOS */}
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+
+        <div
+          className="min-h-0 flex-1 overflow-y-auto p-4"
+          style={{
+            WebkitOverflowScrolling:
+              "touch",
+          }}
+        >
           {itens.length === 0 ? (
             <div className="mt-24 text-center">
               <div className="text-6xl">
@@ -213,7 +225,7 @@ ${total.toLocaleString("pt-BR", {
               <button
                 type="button"
                 onClick={fecharCarrinho}
-                className="mt-7 rounded-full border border-[#C8A95B] px-6 py-3 font-semibold text-[#C8A95B] transition hover:bg-[#C8A95B] hover:text-[#111111]"
+                className="mt-7 rounded-full border border-[#C8A95B] px-6 py-3 font-semibold text-[#C8A95B] transition-colors hover:bg-[#C8A95B] hover:text-[#111111]"
               >
                 Continuar comprando
               </button>
@@ -231,24 +243,39 @@ ${total.toLocaleString("pt-BR", {
                   <div
                     key={chaveItem}
                     className="rounded-2xl border border-[#C8A95B]/20 bg-[#181818] p-3.5"
+                    style={{
+                      contentVisibility:
+                        "auto",
+                      containIntrinsicSize:
+                        "420px",
+                    }}
                   >
-                    {item.produto
-                      .imagem_principal ? (
-                      <img
-                        src={
-                          item.produto
-                            .imagem_principal
-                        }
-                        alt={
-                          item.produto.nome
-                        }
-                        className="h-40 w-full rounded-2xl object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-40 w-full items-center justify-center rounded-2xl bg-[#111111] text-6xl">
-                        👠
-                      </div>
-                    )}
+                    {/* IMAGEM */}
+
+                    <div className="h-40 w-full overflow-hidden rounded-2xl bg-[#111111]">
+                      {item.produto
+                        .imagem_principal ? (
+                        <img
+                          src={
+                            item.produto
+                              .imagem_principal
+                          }
+                          alt={
+                            item.produto.nome
+                          }
+                          loading="lazy"
+                          decoding="async"
+                          draggable={false}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-6xl">
+                          👠
+                        </div>
+                      )}
+                    </div>
+
+                    {/* INFORMAÇÕES */}
 
                     <div className="mt-3">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#C8A95B]">
@@ -267,6 +294,8 @@ ${total.toLocaleString("pt-BR", {
                         }
                       </p>
                     </div>
+
+                    {/* COR + TAMANHO */}
 
                     <div className="mt-3 grid grid-cols-2 gap-2">
                       <div className="rounded-xl border border-[#C8A95B]/15 bg-[#111111] px-3 py-2">
@@ -291,6 +320,8 @@ ${total.toLocaleString("pt-BR", {
                         </p>
                       </div>
                     </div>
+
+                    {/* VALORES */}
 
                     <div className="mt-3 flex items-end justify-between gap-4">
                       <div>
@@ -330,6 +361,8 @@ ${total.toLocaleString("pt-BR", {
                       </div>
                     </div>
 
+                    {/* QUANTIDADE */}
+
                     <div className="mt-3 flex items-center justify-between border-t border-[#C8A95B]/10 pt-3">
                       <div className="flex items-center gap-2">
                         <button
@@ -342,7 +375,7 @@ ${total.toLocaleString("pt-BR", {
                             )
                           }
                           aria-label="Diminuir quantidade"
-                          className="flex h-8 w-8 items-center justify-center rounded-full border border-[#C8A95B] text-[#C8A95B] transition hover:bg-[#C8A95B] hover:text-[#111111]"
+                          className="flex h-8 w-8 touch-manipulation items-center justify-center rounded-full border border-[#C8A95B] text-[#C8A95B] transition-colors active:bg-[#C8A95B] active:text-[#111111]"
                         >
                           −
                         </button>
@@ -361,7 +394,7 @@ ${total.toLocaleString("pt-BR", {
                             )
                           }
                           aria-label="Aumentar quantidade"
-                          className="flex h-8 w-8 items-center justify-center rounded-full border border-[#C8A95B] text-[#C8A95B] transition hover:bg-[#C8A95B] hover:text-[#111111]"
+                          className="flex h-8 w-8 touch-manipulation items-center justify-center rounded-full border border-[#C8A95B] text-[#C8A95B] transition-colors active:bg-[#C8A95B] active:text-[#111111]"
                         >
                           +
                         </button>
@@ -374,7 +407,7 @@ ${total.toLocaleString("pt-BR", {
                             item.produto.id
                           )
                         }
-                        className="text-sm font-semibold text-red-400 transition hover:text-red-300"
+                        className="touch-manipulation text-sm font-semibold text-red-400"
                       >
                         Remover
                       </button>
@@ -387,9 +420,9 @@ ${total.toLocaleString("pt-BR", {
         </div>
 
         {/* RESUMO COMPACTO */}
+
         {itens.length > 0 && (
           <div className="shrink-0 border-t border-[#C8A95B]/20 bg-[#0f0f0f] px-5 py-3">
-            {/* QUANTIDADE + FRETE */}
             <div className="flex items-center justify-between gap-4 text-xs text-[#F3E8D7]/55">
               <span>
                 {quantidadeItens}{" "}
@@ -404,7 +437,6 @@ ${total.toLocaleString("pt-BR", {
               </span>
             </div>
 
-            {/* TOTAL */}
             <div className="mt-2 flex items-center justify-between border-t border-[#C8A95B]/15 pt-2">
               <span className="font-semibold text-white">
                 Total
@@ -421,12 +453,11 @@ ${total.toLocaleString("pt-BR", {
               </span>
             </div>
 
-            {/* BOTÕES SECUNDÁRIOS */}
             <div className="mt-3 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={fecharCarrinho}
-                className="rounded-full border border-[#C8A95B] px-2 py-2 text-sm font-semibold text-[#C8A95B] transition hover:bg-[#C8A95B] hover:text-[#111111]"
+                className="touch-manipulation rounded-full border border-[#C8A95B] px-2 py-2 text-sm font-semibold text-[#C8A95B] transition-colors active:bg-[#C8A95B] active:text-[#111111]"
               >
                 Continuar comprando
               </button>
@@ -434,18 +465,17 @@ ${total.toLocaleString("pt-BR", {
               <button
                 type="button"
                 onClick={limparCarrinho}
-                className="rounded-full border border-red-500 px-2 py-2 text-sm font-semibold text-red-400 transition hover:bg-red-500 hover:text-white"
+                className="touch-manipulation rounded-full border border-red-500 px-2 py-2 text-sm font-semibold text-red-400 transition-colors active:bg-red-500 active:text-white"
               >
                 Limpar Carrinho
               </button>
             </div>
 
-            {/* FINALIZAR */}
             <button
               type="button"
               onClick={finalizarPedido}
               disabled={enviando}
-              className="mt-2.5 block w-full rounded-full bg-[#C8A95B] py-3 text-center font-bold text-[#111111] transition hover:scale-[1.01] hover:bg-[#e5c96f] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-2.5 block w-full touch-manipulation rounded-full bg-[#C8A95B] py-3 text-center font-bold text-[#111111] transition-colors active:bg-[#e5c96f] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {enviando
                 ? "Registrando pedido..."
