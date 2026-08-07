@@ -208,7 +208,14 @@ useEffect(() => {
           </div>
 
         </div>
+        
 
+<Alertas
+  loading={loading}
+  produtosBaixoEstoque={
+    resumo.produtosBaixoEstoque
+  }
+/>
 <ResumoOperacional
   loading={loading}
   totalPedidos={resumo.totalPedidos}
@@ -225,18 +232,17 @@ useEffect(() => {
   loading={loading}
   faturamento={resumo.faturamento}
   valorMedioPedido={resumo.valorMedioPedido}
+  pedidos={resumo.pedidos}
 />
 
 <ResumoEstoque
   loading={loading}
   estoqueTotal={resumo.estoqueTotal}
+  produtos={resumo.produtos}
   produtosBaixoEstoque={resumo.produtosBaixoEstoque}
 />
 
-<Alertas
-  loading={loading}
-  produtosBaixoEstoque={resumo.produtosBaixoEstoque}
-/>
+
 
 <Movimentacoes
   loading={loading}

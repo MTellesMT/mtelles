@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { registrarSaida } from "@/services/estoque";
+
 const PEDIDOS = "pedidos";
 const ITENS = "pedido_itens";
 
@@ -7,6 +8,15 @@ interface NovoPedido {
   nome_cliente: string;
   telefone: string;
   total: number;
+
+  cep: string;
+  logradouro: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  referencia: string;
 }
 
 interface NovoItemPedido {
@@ -27,22 +37,31 @@ export async function criarPedido(
 ) {
   console.log("PEDIDO:", pedido);
 
-  const { data: pedidoCriado, error } =
-    await supabase
-      .from(PEDIDOS)
-      .insert(pedido)
-      .select()
-      .single();
+  const {
+    data: pedidoCriado,
+    error,
+  } = await supabase
+    .from(PEDIDOS)
+    .insert(pedido)
+    .select()
+    .single();
 
   console.log("ERRO PEDIDO:", error);
-  console.log("PEDIDO CRIADO:", pedidoCriado);
+  console.log(
+    "PEDIDO CRIADO:",
+    pedidoCriado
+  );
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
-  const itensPedido = itens.map((item) => ({
-    ...item,
-    pedido_id: pedidoCriado.id,
-  }));
+  const itensPedido = itens.map(
+    (item) => ({
+      ...item,
+      pedido_id: pedidoCriado.id,
+    })
+  );
 
   console.log("ITENS:", itensPedido);
 
@@ -51,9 +70,14 @@ export async function criarPedido(
       .from(ITENS)
       .insert(itensPedido);
 
-  console.log("ERRO ITENS:", erroItens);
+  console.log(
+    "ERRO ITENS:",
+    erroItens
+  );
 
-  if (erroItens) throw erroItens;
+  if (erroItens) {
+    throw erroItens;
+  }
 
   return pedidoCriado;
 }
@@ -67,7 +91,9 @@ export async function getPedidos() {
         ascending: false,
       });
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
   return data ?? [];
 }
@@ -86,13 +112,16 @@ export async function getItensPedido(
       `)
       .eq("pedido_id", pedidoId);
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
   return (
     data?.map((item: any) => ({
       ...item,
       imagem_principal:
-        item.produtos?.imagem_principal ?? "",
+        item.produtos
+          ?.imagem_principal ?? "",
     })) ?? []
   );
 }
@@ -100,34 +129,43 @@ export async function getItensPedido(
 export async function getItensPedidoEstoque(
   pedidoId: number
 ) {
-  const { data, error } = await supabase
-    .from(ITENS)
-    .select(`
-      produto_id,
-      nome_produto,
-      quantidade
-    `)
-    .eq("pedido_id", pedidoId);
+  const { data, error } =
+    await supabase
+      .from(ITENS)
+      .select(`
+        produto_id,
+        nome_produto,
+        quantidade
+      `)
+      .eq("pedido_id", pedidoId);
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
   return data ?? [];
 }
+
 export async function atualizarStatusPedido(
   id: number,
   status: string
 ) {
-  const { data: pedidoAtual, error: erroPedido } =
-    await supabase
-      .from(PEDIDOS)
-      .select("status")
-      .eq("id", id)
-      .single();
+  const {
+    data: pedidoAtual,
+    error: erroPedido,
+  } = await supabase
+    .from(PEDIDOS)
+    .select("status")
+    .eq("id", id)
+    .single();
 
-  if (erroPedido) throw erroPedido;
+  if (erroPedido) {
+    throw erroPedido;
+  }
 
   if (
-    pedidoAtual.status === "ENTREGUE" &&
+    pedidoAtual.status ===
+      "ENTREGUE" &&
     status === "ENTREGUE"
   ) {
     return;
@@ -135,10 +173,14 @@ export async function atualizarStatusPedido(
 
   const { error } = await supabase
     .from(PEDIDOS)
-    .update({ status })
+    .update({
+      status,
+    })
     .eq("id", id);
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
   if (status !== "ENTREGUE") {
     return;
@@ -149,12 +191,21 @@ export async function atualizarStatusPedido(
 
   for (const item of itens) {
     await registrarSaida({
-      produto_id: item.produto_id,
+      produto_id:
+        item.produto_id,
+
       tipo: "SAIDA",
-      quantidade: item.quantidade,
+
+      quantidade:
+        item.quantidade,
+
       motivo: "Venda",
-      referencia: `Pedido #${id}`,
-      observacao: item.nome_produto,
+
+      referencia:
+        `Pedido #${id}`,
+
+      observacao:
+        item.nome_produto,
     });
   }
 }
