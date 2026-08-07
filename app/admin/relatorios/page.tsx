@@ -1,5 +1,5 @@
 "use client";
-
+import AcessoRestritoPage from "@/components/admin/AcessoRestritoPage";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -74,24 +74,69 @@ produtos: [],
 
   });
 
-  useEffect(() => {
-    carregarResumo();
-  }, []);
+ useEffect(() => {
+  const logado =
+    sessionStorage.getItem("adminLogado");
 
-  async function carregarResumo() {
+  if (logado !== "true") {
+    window.location.replace("/login");
+    return;
+  }
+
+  const nivel =
+    sessionStorage.getItem("adminNivel");
+
+  if (nivel === "MASTER") {
+    setAcessoPermitido(true);
+  } else {
+    setAcessoPermitido(false);
+
+    setTimeout(() => {
+      window.location.replace("/admin");
+    }, 3000);
+  }
+}, []);
+
+const [acessoPermitido, setAcessoPermitido] =
+  useState<boolean | null>(null);
+  
+
+useEffect(() => {
+  if (acessoPermitido !== true) {
+    return;
+  }
+
+  async function carregarRelatorio() {
     try {
-      const dados =
+      setLoading(true);
+
+      const data =
         await getResumoRelatorio();
 
-      setResumo(dados);
+      setResumo(data);
+
     } catch (error) {
       console.error(error);
+
     } finally {
       setLoading(false);
     }
   }
 
+  carregarRelatorio();
+}, [acessoPermitido]);
+
+ if (acessoPermitido === false) {
   return (
+    <AcessoRestritoPage
+      onOk={() =>
+        window.location.replace("/admin")
+      }
+    />
+  );
+}  
+  return (
+ 
     <main className="min-h-screen bg-[#111111] text-white">
 
       <div className="mx-auto max-w-7xl px-8 py-10">

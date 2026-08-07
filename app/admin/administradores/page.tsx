@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+
 import AdminForm from "@/components/admin/AdminForm";
+
+import AcessoRestritoPage from "@/components/admin/AcessoRestritoPage";
 
 import {
   alterarStatusAdmin,
@@ -10,7 +13,6 @@ import {
   updateAdmin,
 } from "@/services/admins";
 
-import AcessoNegadoModal from "@/components/admin/AcessoNegadoModal";
 interface Admin {
   id: number;
   nome: string;
@@ -58,32 +60,32 @@ const [nivelEditando, setNivelEditando] =
     }
   }, []);
   
-const [mostrarAcessoNegado, setMostrarAcessoNegado] =
-  useState(false);
+const [acessoPermitido, setAcessoPermitido] =
+  useState<boolean | null>(null);
 
   useEffect(() => {
   const logado =
-  sessionStorage.getItem("adminLogado");
-
-  const nivel =
-  sessionStorage.getItem("adminNivel");
+    sessionStorage.getItem("adminLogado");
 
   if (logado !== "true") {
-    window.location.href = "/login";
+    window.location.replace("/login");
     return;
   }
 
-  if (nivel !== "MASTER") {
-  setMostrarAcessoNegado(true);
+  const nivel =
+    sessionStorage.getItem("adminNivel");
 
-  setTimeout(() => {
-    window.location.replace("/admin");
-  }, 3000);
+  if (nivel === "MASTER") {
+    setAcessoPermitido(true);
 
-  return;
-}
+    carregarAdmins();
+  } else {
+    setAcessoPermitido(false);
 
-  carregarAdmins();
+    setTimeout(() => {
+      window.location.replace("/admin");
+    }, 3000);
+  }
 }, [carregarAdmins]);
 
   async function alterarStatus(
@@ -166,7 +168,17 @@ async function salvarEdicao() {
     alert("Erro ao atualizar.");
   }
 }
+ if (acessoPermitido === false) {
   return (
+    <AcessoRestritoPage
+      onOk={() =>
+        window.location.replace("/admin")
+      }
+    />
+  );
+}
+
+return (
     <main className="min-h-screen bg-[#111111] p-8 text-white">
       <div className="mx-auto max-w-7xl">
 
@@ -410,12 +422,7 @@ async function salvarEdicao() {
 
   </div>
 )}
-<AcessoNegadoModal
-  aberto={mostrarAcessoNegado}
-  onOk={() => {
-    window.location.replace("/admin");
-  }}
-/>
+
     </main>
   );
 }
