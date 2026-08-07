@@ -54,10 +54,9 @@ interface CartContextData {
   fecharCarrinho: () => void;
 }
 
-const CartContext =
-  createContext<CartContextData>(
-    {} as CartContextData
-  );
+const CartContext = createContext<CartContextData>(
+  {} as CartContextData
+);
 
 interface Props {
   children: ReactNode;
@@ -66,17 +65,16 @@ interface Props {
 export function CartProvider({
   children,
 }: Props) {
-  const [itens, setItens] =
-    useState<CartItem[]>([]);
+  const [itens, setItens] = useState<CartItem[]>(
+    []
+  );
 
-  const [aberto, setAberto] =
-    useState(false);
+  const [aberto, setAberto] = useState(false);
 
   useEffect(() => {
-    const carrinho =
-      localStorage.getItem(
-        "mtelles-cart"
-      );
+    const carrinho = localStorage.getItem(
+      "mtelles-cart"
+    );
 
     if (carrinho) {
       setItens(JSON.parse(carrinho));
@@ -96,28 +94,24 @@ export function CartProvider({
     cor: string
   ) {
     setItens((estadoAtual) => {
-      const existe =
-        estadoAtual.find(
-          (item) =>
-            item.produto.id ===
-              produto.id &&
-            item.tamanho === tamanho &&
-            item.cor === cor
-        );
+      const existe = estadoAtual.find(
+        (item) =>
+          item.produto.id === produto.id &&
+          item.tamanho === tamanho &&
+          item.cor === cor
+      );
 
       if (existe) {
-        return estadoAtual.map(
-          (item) =>
-            item.produto.id ===
-              produto.id &&
-            item.tamanho === tamanho &&
-            item.cor === cor
-              ? {
-                  ...item,
-                  quantidade:
-                    item.quantidade + 1,
-                }
-              : item
+        return estadoAtual.map((item) =>
+          item.produto.id === produto.id &&
+          item.tamanho === tamanho &&
+          item.cor === cor
+            ? {
+                ...item,
+                quantidade:
+                  item.quantidade + 1,
+              }
+            : item
         );
       }
 
@@ -131,17 +125,12 @@ export function CartProvider({
         },
       ];
     });
-
-    setAberto(true);
   }
 
-  function removerProduto(
-    id: number
-  ) {
+  function removerProduto(id: number) {
     setItens((estadoAtual) =>
       estadoAtual.filter(
-        (item) =>
-          item.produto.id !== id
+        (item) => item.produto.id !== id
       )
     );
   }
@@ -164,7 +153,9 @@ export function CartProvider({
           : item
       )
     );
-  }  function diminuirQuantidade(
+  }
+
+  function diminuirQuantidade(
     id: number,
     tamanho: string,
     cor: string
@@ -183,8 +174,7 @@ export function CartProvider({
             : item
         )
         .filter(
-          (item) =>
-            item.quantidade > 0
+          (item) => item.quantidade > 0
         )
     );
   }
@@ -201,14 +191,13 @@ export function CartProvider({
     setAberto(false);
   }
 
-  const quantidadeItens =
-    useMemo(() => {
-      return itens.reduce(
-        (total, item) =>
-          total + item.quantidade,
-        0
-      );
-    }, [itens]);
+  const quantidadeItens = useMemo(() => {
+    return itens.reduce(
+      (total, item) =>
+        total + item.quantidade,
+      0
+    );
+  }, [itens]);
 
   const total = useMemo(() => {
     return itens.reduce(
@@ -252,7 +241,5 @@ export function CartProvider({
 }
 
 export function useCart() {
-  return useContext(
-    CartContext
-  );
+  return useContext(CartContext);
 }
