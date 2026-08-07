@@ -1,8 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { criarPedido } from "@/services/pedidos";
 import { useCart } from "./CartContext";
-
 const whatsapp = "5521966682941";
 
 export default function CartDrawer() {
@@ -17,6 +16,19 @@ export default function CartDrawer() {
     removerProduto,
     limparCarrinho,
   } = useCart();
+
+
+useEffect(() => {
+  if (aberto) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, [aberto]);
 
 const [enviando, setEnviando] =
   useState(false);
@@ -164,7 +176,8 @@ fecharCarrinho();
         className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm"
       />
 
-      <aside className="fixed right-0 top-0 z-[100] flex h-screen w-full max-w-md flex-col border-l border-[#C8A95B]/20 bg-[#111111] shadow-2xl">
+      <aside className="fixed right-0 top-0 z-[100] flex h-dvh w-full max-w-md flex-col overflow-hidden border-l border-[#C8A95B]/20 bg-[#111111] shadow-2xl"
+      >
         <div className="flex items-center justify-between border-b border-[#C8A95B]/20 p-6">
           <div>
             <h2 className="text-2xl font-bold text-white">
