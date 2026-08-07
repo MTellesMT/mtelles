@@ -342,17 +342,23 @@ return (
 
    <button
   onClick={async () => {
-    try {
-      const itens = await getItensPedido(pedido.id);
+  console.log("Botão Ver clicado");
 
-      setItensPedido(itens);
-      setPedidoSelecionado(pedido);
-      setModalAberto(true);
-    } catch (error) {
-      console.error(error);
-      alert("Não foi possível carregar os itens do pedido.");
-    }
-  }}
+  try {
+    const itens = await getItensPedido(pedido.id);
+
+    console.log("Itens:", itens);
+
+    setItensPedido(itens);
+    setPedidoSelecionado(pedido);
+    setModalAberto(true);
+
+    console.log("Modal:", true);
+  } catch (error) {
+    console.error(error);
+    alert("Não foi possível carregar os itens do pedido.");
+  }
+}}
   className="rounded-lg bg-[#C8A95B] px-4 py-2 text-sm font-semibold text-[#111111] transition hover:brightness-110"
 >
   Ver

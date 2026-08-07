@@ -185,7 +185,97 @@ const [mostrarPedidos, setMostrarPedidos] =
     </strong>
 
   </button>
+{mostrarPedidos && (
 
+  <div className="mt-5 overflow-hidden rounded-2xl border border-[#2A2A2A]">
+
+    <table className="w-full">
+
+      <thead className="bg-[#181818]">
+
+        <tr>
+
+          <th className="p-4 text-left">
+            Cliente
+          </th>
+
+          <th className="p-4 text-left">
+            Status
+          </th>
+
+          <th className="p-4 text-left">
+            Total
+          </th>
+
+          <th className="p-4 text-left">
+            Data
+          </th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {pedidos.length === 0 ? (
+
+          <tr>
+
+            <td
+              colSpan={4}
+              className="p-6 text-center text-[#F3E8D7]/60"
+            >
+              Nenhum pedido encontrado.
+            </td>
+
+          </tr>
+
+        ) : (
+
+          pedidos.map((pedido) => (
+
+            <tr
+              key={pedido.id}
+              className="border-t border-[#2A2A2A]"
+            >
+
+              <td className="p-4">
+                {pedido.cliente}
+              </td>
+
+              <td className="p-4">
+                {pedido.status}
+              </td>
+
+              <td className="p-4">
+                {Number(pedido.total).toLocaleString(
+                  "pt-BR",
+                  {
+                    style: "currency",
+                    currency: "BRL",
+                  }
+                )}
+              </td>
+
+              <td className="p-4">
+                {new Date(
+                  pedido.created_at
+                ).toLocaleDateString("pt-BR")}
+              </td>
+
+            </tr>
+
+          ))
+
+        )}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+)}
 </div>
 
         <div className="flex justify-between border-b border-[#2A2A2A] pb-3">
