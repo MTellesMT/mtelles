@@ -185,114 +185,100 @@ const [mostrarPedidos, setMostrarPedidos] =
     </strong>
 
   </button>
-{mostrarPedidos && (
 
-  <div className="mt-5 overflow-hidden rounded-2xl border border-[#2A2A2A]">
+  {mostrarPedidos && (
 
-    <table className="w-full">
+    <div className="mt-5 overflow-hidden rounded-2xl border border-[#2A2A2A]">
 
-      <thead className="bg-[#181818]">
+      <table className="w-full">
 
-        <tr>
-
-          <th className="p-4 text-left">
-            Cliente
-          </th>
-
-          <th className="p-4 text-left">
-            Status
-          </th>
-
-          <th className="p-4 text-left">
-            Total
-          </th>
-
-          <th className="p-4 text-left">
-            Data
-          </th>
-
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-        {pedidos.length === 0 ? (
+        <thead className="bg-[#181818]">
 
           <tr>
 
-            <td
-              colSpan={4}
-              className="p-6 text-center text-[#F3E8D7]/60"
-            >
-              Nenhum pedido encontrado.
-            </td>
+            <th className="p-4 text-left">
+              Cliente
+            </th>
+
+            <th className="p-4 text-left">
+              Status
+            </th>
+
+            <th className="p-4 text-left">
+              Total
+            </th>
+
+            <th className="p-4 text-left">
+              Data
+            </th>
 
           </tr>
 
-        ) : (
+        </thead>
 
-          pedidos.map((pedido) => (
+        <tbody>
 
-            <tr
-              key={pedido.id}
-              className="border-t border-[#2A2A2A]"
-            >
+          {pedidos.length === 0 ? (
 
-              <td className="p-4">
-                {pedido.cliente}
-              </td>
+            <tr>
 
-              <td className="p-4">
-                {pedido.status}
-              </td>
-
-              <td className="p-4">
-                {Number(pedido.total).toLocaleString(
-                  "pt-BR",
-                  {
-                    style: "currency",
-                    currency: "BRL",
-                  }
-                )}
-              </td>
-
-              <td className="p-4">
-                {new Date(
-                  pedido.created_at
-                ).toLocaleDateString("pt-BR")}
+              <td
+                colSpan={4}
+                className="p-6 text-center text-[#F3E8D7]/60"
+              >
+                Nenhum pedido encontrado.
               </td>
 
             </tr>
 
-          ))
+          ) : (
 
-        )}
+            pedidos.map((pedido) => (
 
-      </tbody>
+              <tr
+                key={pedido.id}
+                className="border-t border-[#2A2A2A]"
+              >
 
-    </table>
+                <td className="p-4">
+                  {pedido.cliente}
+                </td>
 
-  </div>
+                <td className="p-4">
+                  {pedido.status}
+                </td>
 
-)}
+                <td className="p-4">
+                  {Number(pedido.total).toLocaleString(
+                    "pt-BR",
+                    {
+                      style: "currency",
+                      currency: "BRL",
+                    }
+                  )}
+                </td>
+
+                <td className="p-4">
+                  {new Date(
+                    pedido.created_at
+                  ).toLocaleDateString("pt-BR")}
+                </td>
+
+              </tr>
+
+            ))
+
+          )}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  )}
+
 </div>
-
-        <div className="flex justify-between border-b border-[#2A2A2A] pb-3">
-          <span>Pedidos entregues</span>
-
-          <strong className="text-green-400">
-            {loading ? "--" : pedidosEntregues}
-          </strong>
-        </div>
-
-        <div className="flex justify-between border-b border-[#2A2A2A] pb-3">
-          <span>Pedidos pendentes</span>
-
-          <strong className="text-orange-400">
-            {loading ? "--" : totalPedidos - pedidosEntregues}
-          </strong>
-        </div>
 
 <div className="border-b border-[#2A2A2A] pb-3">
 
@@ -332,56 +318,55 @@ const [mostrarPedidos, setMostrarPedidos] =
 
       <table className="w-full">
 
-       <tbody>
+        <tbody>
 
-  {produtosBaixoEstoque.length === 0 ? (
+          {produtosBaixoEstoque.length === 0 ? (
 
-    <tr>
+            <tr>
 
-      <td
-        colSpan={3}
-        className="p-6 text-center text-green-400"
-      >
-        Nenhum produto com estoque baixo.
-      </td>
+              <td
+                colSpan={3}
+                className="p-6 text-center text-green-400"
+              >
+                Nenhum produto com estoque baixo.
+              </td>
 
-    </tr>
+            </tr>
 
-  ) : (
+          ) : (
 
-    produtosBaixoEstoque.map((produto) => (
+            produtosBaixoEstoque.map((produto) => (
 
-      <tr
-        key={`${produto.marca}-${produto.nome}`}
-        className="border-t border-[#2A2A2A]"
-      >
+              <tr
+                key={`${produto.marca}-${produto.nome}`}
+                className="border-t border-[#2A2A2A]"
+              >
 
-        <td className="w-1/4 p-4">
-          {produto.marca}
-        </td>
+                <td className="w-1/4 p-4">
+                  {produto.marca}
+                </td>
 
-        <td className="w-2/4 p-4">
-          {produto.nome}
-        </td>
+                <td className="w-2/4 p-4">
+                  {produto.nome}
+                </td>
 
-        <td
-          className={`w-1/4 p-4 text-center font-bold ${
-            produto.estoque === 0
-              ? "text-red-400"
-              : "text-orange-400"
-          }`}
-        >
-          {produto.estoque}
-        </td>
+                <td
+                  className={`w-1/4 p-4 text-center font-bold ${
+                    produto.estoque === 0
+                      ? "text-red-400"
+                      : "text-orange-400"
+                  }`}
+                >
+                  {produto.estoque}
+                </td>
 
-      </tr>
+              </tr>
 
-    ))
+            ))
 
-  )}
+          )}
 
-</tbody>
-       
+        </tbody>
 
       </table>
 
@@ -391,15 +376,37 @@ const [mostrarPedidos, setMostrarPedidos] =
 
 </div>
 
-        <div className="flex justify-between border-b border-[#2A2A2A] pb-3">
-          <span>Taxa de conclusão</span>
+<div className="flex justify-between border-b border-[#2A2A2A] pb-3">
 
-          <strong className="text-blue-400">
-            {loading
-              ? "--"
-              : `${percentualEntregues.toFixed(1)}%`}
-          </strong>
-        </div>
+  <span>Pedidos entregues</span>
+
+  <strong className="text-green-400">
+    {loading ? "--" : pedidosEntregues}
+  </strong>
+
+</div>
+
+<div className="flex justify-between border-b border-[#2A2A2A] pb-3">
+
+  <span>Pedidos pendentes</span>
+
+  <strong className="text-orange-400">
+    {loading ? "--" : totalPedidos - pedidosEntregues}
+  </strong>
+
+</div>
+
+<div className="flex justify-between border-b border-[#2A2A2A] pb-3">
+
+  <span>Taxa de conclusão</span>
+
+  <strong className="text-blue-400">
+    {loading
+      ? "--"
+      : `${percentualEntregues.toFixed(1)}%`}
+  </strong>
+
+</div>
 
       </div>
 
