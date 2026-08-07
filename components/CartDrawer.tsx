@@ -269,36 +269,22 @@ ${total.toLocaleString("pt-BR", {
                   <div
                     key={chaveItem}
                     className="rounded-2xl border border-[#C8A95B]/20 bg-[#181818] p-3.5"
-                    style={{
-                      contentVisibility:
-                        "auto",
-                      containIntrinsicSize:
-                        "420px",
-                    }}
                   >
-                    {/* IMAGEM */}
+                    {/* TESTE:
+                        IMAGEM DESATIVADA
+                        TEMPORARIAMENTE */}
 
-                    <div className="h-40 w-full overflow-hidden rounded-2xl bg-[#111111]">
-                      {item.produto
-                        .imagem_principal ? (
-                        <img
-                          src={
-                            item.produto
-                              .imagem_principal
-                          }
-                          alt={
-                            item.produto.nome
-                          }
-                          loading="lazy"
-                          decoding="async"
-                          draggable={false}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-6xl">
+                    <div className="flex h-40 w-full items-center justify-center rounded-2xl bg-[#111111]">
+                      <div className="text-center">
+                        <div className="text-5xl">
                           👠
                         </div>
-                      )}
+
+                        <p className="mt-2 text-xs text-[#F3E8D7]/35">
+                          Imagem desativada
+                          para teste
+                        </p>
+                      </div>
                     </div>
 
                     {/* INFORMAÇÕES */}
