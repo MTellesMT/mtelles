@@ -143,33 +143,112 @@ const [listaTamanhos, setListaTamanhos] =
   const [maisVendido,setMaisVendido] =
     useState(false);
 
+useEffect(() => {
+
+  const coresSalvas =
+    localStorage.getItem(
+      "mtelles_cores"
+    );
 
 
-  useEffect(()=>{
+  if (!coresSalvas) {
+    return;
+  }
 
 
-    if(!productToEdit){
+  try {
 
-      return;
+    const lista =
+      JSON.parse(
+        coresSalvas
+      );
+
+
+    if (Array.isArray(lista)) {
+
+      setListaCores(
+        lista
+      );
 
     }
 
+  } catch {
 
-    setNome(productToEdit.nome);
+    console.error(
+      "Erro ao carregar cores salvas."
+    );
 
-    setMarca(productToEdit.marca);
+  }
 
-    setCategoria(productToEdit.categoria);
+}, []);
 
-    setCodigo(productToEdit.codigo);
 
-    setDescricao(productToEdit.descricao);
 
-    setPreco(String(productToEdit.preco));
 
-    setEstoque(String(productToEdit.estoque));
+useEffect(() => {
 
-    setCoresSelecionadas(
+  const tamanhosSalvos =
+    localStorage.getItem(
+      "mtelles_tamanhos"
+    );
+
+
+  if (!tamanhosSalvos) {
+    return;
+  }
+
+
+  try {
+
+    const lista =
+      JSON.parse(
+        tamanhosSalvos
+      );
+
+
+    if (Array.isArray(lista)) {
+
+      setListaTamanhos(
+        lista
+      );
+
+    }
+
+  } catch {
+
+    console.error(
+      "Erro ao carregar tamanhos salvos."
+    );
+
+  }
+
+}, []);
+
+useEffect(()=>{
+
+
+  if(!productToEdit){
+
+    return;
+
+  }
+
+
+  setNome(productToEdit.nome);
+
+setMarca(productToEdit.marca);
+
+setCategoria(productToEdit.categoria);
+
+setCodigo(productToEdit.codigo);
+
+setDescricao(productToEdit.descricao);
+
+setPreco(String(productToEdit.preco));
+
+setEstoque(String(productToEdit.estoque));
+
+setCoresSelecionadas(
   productToEdit.cores
     ? productToEdit.cores
         .split(",")
@@ -319,11 +398,22 @@ function adicionarCor(){
 
   if(!listaCores.includes(valor)){
 
+    const novaLista = [
+      ...listaCores,
+      valor,
+    ];
+
+
     setListaCores(
-      (lista:string[]) => [
-        ...lista,
-        valor,
-      ]
+      novaLista
+    );
+
+
+    localStorage.setItem(
+      "mtelles_cores",
+      JSON.stringify(
+        novaLista
+      )
     );
 
   }
@@ -365,11 +455,22 @@ function adicionarTamanho(){
 
   if(!listaTamanhos.includes(valor)){
 
+    const novaLista = [
+      ...listaTamanhos,
+      valor,
+    ];
+
+
     setListaTamanhos(
-      (lista:string[]) => [
-        ...lista,
-        valor,
-      ]
+      novaLista
+    );
+
+
+    localStorage.setItem(
+      "mtelles_tamanhos",
+      JSON.stringify(
+        novaLista
+      )
     );
 
   }
@@ -516,11 +617,7 @@ function adicionarTamanho(){
 
       setEstoque("");
 
-      setCores("");
-
-      setTamanhos("");
-
-      setImagens([]);
+      
 
 
 
@@ -852,46 +949,86 @@ function adicionarTamanho(){
   </label>
 
   <select
-  value=""
-  onChange={(e) => {
-    const valor = e.target.value;
+    value=""
+    onChange={(e) => {
+      const valor = e.target.value;
 
-    if (valor === "__nova__") {
-      setMostrarNovaCor(true);
-      return;
-    }
-
-    if (!valor) {
-      return;
-    }
-
-    setCoresSelecionadas((selecionadas) => {
-      if (selecionadas.includes(valor)) {
-        return selecionadas;
+      if (valor === "__nova__") {
+        setMostrarNovaCor(true);
+        return;
       }
 
-      return [...selecionadas, valor];
-    });
-  }}
-  className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
->
-  <option value="">
-    Selecione uma cor
-  </option>
+      if (!valor) {
+        return;
+      }
 
-  {listaCores.map((item: string) => (
-    <option
-      key={item}
-      value={item}
-    >
-      {item}
+      setCoresSelecionadas((selecionadas) => {
+        if (selecionadas.includes(valor)) {
+          return selecionadas;
+        }
+
+        return [...selecionadas, valor];
+      });
+    }}
+    className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
+  >
+    <option value="">
+      Selecione uma cor
     </option>
-  ))}
 
-  <option value="__nova__">
-    Criar nova cor
-  </option>
-</select>
+    {listaCores.map((item: string) => (
+      <option
+        key={item}
+        value={item}
+      >
+        {item}
+      </option>
+    ))}
+
+    <option value="__nova__">
+      Criar nova cor
+    </option>
+  </select>
+
+
+  {coresSelecionadas.length > 0 && (
+
+    <div className="mt-3 flex flex-wrap gap-2">
+
+      {coresSelecionadas.map((item) => (
+
+        <div
+          key={item}
+          className="flex items-center gap-2 rounded-full border border-[#C8A95B]/40 bg-[#111] px-4 py-2"
+        >
+
+          <span className="text-sm text-[#F3E8D7]">
+            {item}
+          </span>
+
+          <button
+            type="button"
+            onClick={() =>
+              setCoresSelecionadas(
+                (selecionadas) =>
+                  selecionadas.filter(
+                    (corSelecionada) =>
+                      corSelecionada !== item
+                  )
+              )
+            }
+            className="font-bold text-red-400 hover:text-red-300"
+          >
+            ×
+          </button>
+
+        </div>
+
+      ))}
+
+    </div>
+
+  )}
 
 
   {mostrarNovaCor && (
@@ -907,13 +1044,12 @@ function adicionarTamanho(){
         className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
       />
 
-
       <button
         type="button"
         onClick={adicionarCor}
-        className="mt-3 rounded-xl bg-[#C8A95B] px-5 py-3 text-[#111]"
+        className="mt-3 rounded-xl bg-[#C8A95B] px-5 py-3 font-semibold text-[#111]"
       >
-        Salvar cor
+        Adicionar cor
       </button>
 
     </div>
@@ -973,7 +1109,46 @@ function adicionarTamanho(){
 </select>
 
 
-  {mostrarNovoTamanho && (
+  {tamanhosSelecionados.length > 0 && (
+
+  <div className="mt-3 flex flex-wrap gap-2">
+
+    {tamanhosSelecionados.map((item) => (
+
+      <div
+        key={item}
+        className="flex items-center gap-2 rounded-full border border-[#C8A95B]/40 bg-[#111] px-4 py-2"
+      >
+
+        <span className="text-sm text-[#F3E8D7]">
+          {item}
+        </span>
+
+        <button
+          type="button"
+          onClick={() =>
+            setTamanhosSelecionados(
+              (selecionados) =>
+                selecionados.filter(
+                  (tamanhoSelecionado) =>
+                    tamanhoSelecionado !== item
+                )
+            )
+          }
+          className="font-bold text-red-400 hover:text-red-300"
+        >
+          ×
+        </button>
+
+      </div>
+
+    ))}
+
+  </div>
+
+)}
+
+{mostrarNovoTamanho && (
 
     <div className="mt-3">
 
@@ -1001,6 +1176,23 @@ function adicionarTamanho(){
 
 </div>
 
+<div className="md:col-span-2">
+
+  <label className="mb-2 block">
+    Descrição
+  </label>
+
+  <textarea
+    value={descricao}
+    onChange={(e) =>
+      setDescricao(e.target.value)
+    }
+    rows={5}
+    placeholder="Digite a descrição do produto"
+    className="w-full resize-none rounded-xl border border-[#333] bg-[#111] px-4 py-3"
+  />
+
+</div>
         <div>
 
           <label className="mb-2 block">
