@@ -65,11 +65,11 @@ export default function ProductForm({
   const [novaCategoria,setNovaCategoria] =
     useState("");
 
-    const [cor, setCor] =
-  useState("");
+    const [coresSelecionadas, setCoresSelecionadas] =
+  useState<string[]>([]);
 
-const [tamanho, setTamanho] =
-  useState("");
+const [tamanhosSelecionados, setTamanhosSelecionados] =
+  useState<string[]>([]);
 
 const [novaCor, setNovaCor] =
   useState("");
@@ -169,9 +169,23 @@ const [listaTamanhos, setListaTamanhos] =
 
     setEstoque(String(productToEdit.estoque));
 
-    setCor(productToEdit.cores);
+    setCoresSelecionadas(
+  productToEdit.cores
+    ? productToEdit.cores
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : []
+);
 
-    setTamanho(productToEdit.tamanhos);
+setTamanhosSelecionados(
+  productToEdit.tamanhos
+    ? productToEdit.tamanhos
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : []
+);
 
 
     let galeria:string[]=[];
@@ -303,16 +317,32 @@ function adicionarCor(){
   }
 
 
-  setListaCores(
-    (lista:string[]) =>
-      [
+  if(!listaCores.includes(valor)){
+
+    setListaCores(
+      (lista:string[]) => [
         ...lista,
         valor,
       ]
+    );
+
+  }
+
+
+  setCoresSelecionadas(
+    (selecionadas:string[]) => {
+
+      if(selecionadas.includes(valor)){
+        return selecionadas;
+      }
+
+      return [
+        ...selecionadas,
+        valor,
+      ];
+
+    }
   );
-
-
-  setCor(valor);
 
 
   setNovaCor("");
@@ -320,7 +350,6 @@ function adicionarCor(){
   setMostrarNovaCor(false);
 
 }
-
 
 
 function adicionarTamanho(){
@@ -334,16 +363,32 @@ function adicionarTamanho(){
   }
 
 
-  setListaTamanhos(
-    (lista:string[]) =>
-      [
+  if(!listaTamanhos.includes(valor)){
+
+    setListaTamanhos(
+      (lista:string[]) => [
         ...lista,
         valor,
       ]
+    );
+
+  }
+
+
+  setTamanhosSelecionados(
+    (selecionados:string[]) => {
+
+      if(selecionados.includes(valor)){
+        return selecionados;
+      }
+
+      return [
+        ...selecionados,
+        valor,
+      ];
+
+    }
   );
-
-
-  setTamanho(valor);
 
 
   setNovoTamanho("");
@@ -407,9 +452,9 @@ function adicionarTamanho(){
         estoque:Number(estoque),
 
 
-        cores: cor,
+        cores: coresSelecionadas.join(", "),
 
-        tamanhos: tamanho,
+        tamanhos: tamanhosSelecionados.join(", "),
 
 
         imagem_principal:
@@ -807,45 +852,46 @@ function adicionarTamanho(){
   </label>
 
   <select
-    value={cor}
-    onChange={(e) => {
+  value=""
+  onChange={(e) => {
+    const valor = e.target.value;
 
-      const valor = e.target.value;
+    if (valor === "__nova__") {
+      setMostrarNovaCor(true);
+      return;
+    }
 
-      if (valor === "__nova__") {
+    if (!valor) {
+      return;
+    }
 
-        setMostrarNovaCor(true);
-        setCor("");
-
-        return;
+    setCoresSelecionadas((selecionadas) => {
+      if (selecionadas.includes(valor)) {
+        return selecionadas;
       }
 
-      setCor(valor);
+      return [...selecionadas, valor];
+    });
+  }}
+  className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
+>
+  <option value="">
+    Selecione uma cor
+  </option>
 
-    }}
-    className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
-  >
-
-    <option value="">
-      Selecione uma cor
+  {listaCores.map((item: string) => (
+    <option
+      key={item}
+      value={item}
+    >
+      {item}
     </option>
+  ))}
 
-    {listaCores.map((item: string) => (
-
-      <option
-        key={item}
-        value={item}
-      >
-        {item}
-      </option>
-
-    ))}
-
-    <option value="__nova__">
-      Criar nova cor
-    </option>
-
-  </select>
+  <option value="__nova__">
+    Criar nova cor
+  </option>
+</select>
 
 
   {mostrarNovaCor && (
@@ -885,48 +931,46 @@ function adicionarTamanho(){
 
 
   <select
-    value={tamanho}
-    onChange={(e) => {
+  value=""
+  onChange={(e) => {
+    const valor = e.target.value;
 
-      const valor = e.target.value;
+    if (valor === "__novo__") {
+      setMostrarNovoTamanho(true);
+      return;
+    }
 
-      if (valor === "__novo__") {
+    if (!valor) {
+      return;
+    }
 
-        setMostrarNovoTamanho(true);
-        setTamanho("");
-
-        return;
+    setTamanhosSelecionados((selecionados) => {
+      if (selecionados.includes(valor)) {
+        return selecionados;
       }
 
-      setTamanho(valor);
+      return [...selecionados, valor];
+    });
+  }}
+  className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
+>
+  <option value="">
+    Selecione um tamanho
+  </option>
 
-    }}
-    className="w-full rounded-xl border border-[#333] bg-[#111] px-4 py-3"
-  >
-
-    <option value="">
-      Selecione um tamanho
+  {listaTamanhos.map((item: string) => (
+    <option
+      key={item}
+      value={item}
+    >
+      {item}
     </option>
+  ))}
 
-
-    {listaTamanhos.map((item: string) => (
-
-      <option
-        key={item}
-        value={item}
-      >
-        {item}
-      </option>
-
-    ))}
-
-
-    <option value="__novo__">
-      Criar novo tamanho
-    </option>
-
-
-  </select>
+  <option value="__novo__">
+    Criar novo tamanho
+  </option>
+</select>
 
 
   {mostrarNovoTamanho && (
