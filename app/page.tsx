@@ -659,8 +659,8 @@ export default function Home() {
           <div className="block lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start lg:gap-8">
             {/* ÁREA DOS FILTROS */}
 
-            <div className="relative z-10 mb-10 w-full lg:sticky lg:top-6 lg:mb-0">
-              <SearchBar
+            <div className="relative z-10 mb-10 w-full lg:sticky lg:top-6 lg:mb-0">               
+               <SearchBar
                 busca={busca}
                 setBusca={setBusca}
                 produtos={products}
