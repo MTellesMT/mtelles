@@ -1266,7 +1266,62 @@ function adicionarTamanho(){
 
       </div>
 
+<div className="mt-8 space-y-4">
 
+  <label className="flex cursor-pointer items-center gap-3">
+
+    <input
+      type="checkbox"
+      checked={ativo}
+      onChange={(e) =>
+        setAtivo(e.target.checked)
+      }
+      className="h-5 w-5 accent-[#C8A95B]"
+    />
+
+    <span>
+      Produto ativo
+    </span>
+
+  </label>
+
+
+  <label className="flex cursor-pointer items-center gap-3">
+
+    <input
+      type="checkbox"
+      checked={destaque}
+      onChange={(e) =>
+        setDestaque(e.target.checked)
+      }
+      className="h-5 w-5 accent-[#C8A95B]"
+    />
+
+    <span>
+      Exibir no banner de destaque
+    </span>
+
+  </label>
+
+
+  <label className="flex cursor-pointer items-center gap-3">
+
+    <input
+      type="checkbox"
+      checked={maisVendido}
+      onChange={(e) =>
+        setMaisVendido(e.target.checked)
+      }
+      className="h-5 w-5 accent-[#C8A95B]"
+    />
+
+    <span>
+      Mais vendido
+    </span>
+
+  </label>
+
+</div>
 
 
       <button
