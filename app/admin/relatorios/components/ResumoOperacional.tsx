@@ -130,8 +130,27 @@ export default function ResumoOperacional({
     setSituacaoBaixoEstoque,
   ] = useState("TODOS");
 
+  /*
+   * IMPORTANTE:
+   * Agora somente pedidos com status
+   * PENDENTE são contabilizados aqui.
+   *
+   * ENVIADO, ENTREGUE, CANCELADO e
+   * EXCLUIDO não entram como pendentes.
+   */
+
   const pedidosPendentes =
-    totalPedidos - pedidosEntregues;
+    useMemo(() => {
+      return pedidos.filter(
+        (pedido) =>
+          String(
+            pedido.status ?? ""
+          )
+            .trim()
+            .toUpperCase() ===
+          "PENDENTE"
+      ).length;
+    }, [pedidos]);
 
   function normalizar(
     texto: string
@@ -193,6 +212,72 @@ export default function ResumoOperacional({
     };
   }
 
+  /*
+   * FORMATAÇÃO DO STATUS
+   */
+
+  function obterTextoStatus(
+    status: string
+  ) {
+    const valor =
+      String(status ?? "")
+        .trim()
+        .toUpperCase();
+
+    if (valor === "PENDENTE") {
+      return "PENDENTE";
+    }
+
+    if (valor === "ENVIADO") {
+      return "ENVIADO";
+    }
+
+    if (valor === "ENTREGUE") {
+      return "ENTREGUE";
+    }
+
+    if (valor === "CANCELADO") {
+      return "CANCELADO";
+    }
+
+    if (valor === "EXCLUIDO") {
+      return "EXCLUÍDO";
+    }
+
+    return valor || "—";
+  }
+
+  function obterClasseStatus(
+    status: string
+  ) {
+    const valor =
+      String(status ?? "")
+        .trim()
+        .toUpperCase();
+
+    if (valor === "ENTREGUE") {
+      return "border-green-500/30 bg-green-500/10 text-green-400";
+    }
+
+    if (valor === "ENVIADO") {
+      return "border-purple-500/30 bg-purple-500/10 text-purple-400";
+    }
+
+    if (valor === "CANCELADO") {
+      return "border-red-500/30 bg-red-500/10 text-red-400";
+    }
+
+    if (valor === "EXCLUIDO") {
+      return "border-gray-500/30 bg-gray-500/10 text-gray-300";
+    }
+
+    if (valor === "PENDENTE") {
+      return "border-orange-500/30 bg-orange-500/10 text-orange-400";
+    }
+
+    return "border-gray-500/30 bg-gray-500/10 text-gray-300";
+  }
+
   /* MARCAS DINÂMICAS */
 
   const marcasProdutos =
@@ -225,7 +310,9 @@ export default function ResumoOperacional({
             .map((pedido) =>
               String(
                 pedido.status ?? ""
-              ).trim()
+              )
+                .trim()
+                .toUpperCase()
             )
             .filter(Boolean)
         )
@@ -652,8 +739,6 @@ export default function ResumoOperacional({
 
           {mostrarProdutos && (
             <div className="border-t border-[#343434] bg-[#0f0f0f] p-4">
-              {/* FILTROS PRODUTOS */}
-
               <div className="rounded-xl border border-[#343434] bg-[#151515] p-4">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                   <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#C8A95B]">
@@ -749,12 +834,15 @@ export default function ResumoOperacional({
                       <option value="TODOS">
                         Todos
                       </option>
+
                       <option value="NORMAL">
                         Normal
                       </option>
+
                       <option value="REPOR">
                         Repor
                       </option>
+
                       <option value="SEM">
                         Sem estoque
                       </option>
@@ -784,18 +872,23 @@ export default function ResumoOperacional({
                       <th className="border border-[#343434] px-4 py-3 text-center text-[#C8A95B]">
                         #
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-left text-[#C8A95B]">
                         Código
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-left text-[#C8A95B]">
                         Produto
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-left text-[#C8A95B]">
                         Marca
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-left text-[#C8A95B]">
                         Cor
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-center text-[#C8A95B]">
                         Estoque
                       </th>
@@ -850,9 +943,11 @@ export default function ResumoOperacional({
 
                             <td
                               className={`border border-[#343434] px-4 py-3 text-center font-bold ${
-                                produto.estoque === 0
+                                produto.estoque ===
+                                0
                                   ? "text-red-400"
-                                  : produto.estoque <= 5
+                                  : produto.estoque <=
+                                      5
                                     ? "text-orange-400"
                                     : "text-green-400"
                               }`}
@@ -987,7 +1082,9 @@ export default function ResumoOperacional({
                             key={status}
                             value={status}
                           >
-                            {status}
+                            {obterTextoStatus(
+                              status
+                            )}
                           </option>
                         )
                       )}
@@ -1055,30 +1152,39 @@ export default function ResumoOperacional({
                       <th className="border border-[#343434] px-4 py-3 text-center text-[#C8A95B]">
                         Pedido
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-left text-[#C8A95B]">
                         Data
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-left text-[#C8A95B]">
                         Cliente
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-left text-[#C8A95B]">
                         WhatsApp
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-left text-[#C8A95B]">
                         Endereço
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-left text-[#C8A95B]">
                         Bairro
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-left text-[#C8A95B]">
                         Cidade / UF
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-left text-[#C8A95B]">
                         CEP
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-center text-[#C8A95B]">
                         Status
                       </th>
+
                       <th className="border border-[#343434] px-4 py-3 text-right text-[#C8A95B]">
                         Total
                       </th>
@@ -1112,7 +1218,8 @@ export default function ResumoOperacional({
                             <tr
                               key={pedido.id}
                               className={
-                                index % 2 === 0
+                                index % 2 ===
+                                0
                                   ? "bg-[#121212]"
                                   : "bg-[#171717]"
                               }
@@ -1192,19 +1299,13 @@ export default function ResumoOperacional({
 
                               <td className="border border-[#343434] px-4 py-3 text-center">
                                 <span
-                                  className={`inline-flex rounded-md border px-2.5 py-1 text-xs font-bold ${
-                                    pedido.status ===
-                                    "ENTREGUE"
-                                      ? "border-green-500/30 bg-green-500/10 text-green-400"
-                                      : pedido.status ===
-                                          "CANCELADO"
-                                        ? "border-red-500/30 bg-red-500/10 text-red-400"
-                                        : "border-orange-500/30 bg-orange-500/10 text-orange-400"
-                                  }`}
-                                >
-                                  {
+                                  className={`inline-flex rounded-md border px-2.5 py-1 text-xs font-bold ${obterClasseStatus(
                                     pedido.status
-                                  }
+                                  )}`}
+                                >
+                                  {obterTextoStatus(
+                                    pedido.status
+                                  )}
                                 </span>
                               </td>
 
@@ -1340,9 +1441,11 @@ export default function ResumoOperacional({
                       <option value="TODOS">
                         Todos
                       </option>
+
                       <option value="REPOR">
                         Repor
                       </option>
+
                       <option value="SEM">
                         Sem estoque
                       </option>
@@ -1419,7 +1522,8 @@ export default function ResumoOperacional({
                             <tr
                               key={`${produto.marca}-${produto.nome}`}
                               className={
-                                index % 2 === 0
+                                index % 2 ===
+                                0
                                   ? "bg-[#121212]"
                                   : "bg-[#171717]"
                               }

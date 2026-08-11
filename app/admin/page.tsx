@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import AdminForm from "@/components/admin/AdminForm";
 import Link from "next/link";
+import { getTotalAcessosSite } from "@/services/acessos";
+
+
 import {
   alterarStatusAdmin,
   deleteAdmin,
@@ -38,6 +41,27 @@ const [nivelEditando, setNivelEditando] =
 
 const [modalEditarAberto, setModalEditarAberto] =
   useState(false);
+
+const [totalAcessos, setTotalAcessos] =
+  useState(0);
+
+useEffect(() => {
+  async function carregarAcessos() {
+    try {
+      const total =
+        await getTotalAcessosSite();
+
+      setTotalAcessos(total);
+    } catch (error) {
+      console.error(
+        "Erro ao carregar acessos do site:",
+        error
+      );
+    }
+  }
+
+  carregarAcessos();
+}, []);
 
 useEffect(() => {
   const logado =
@@ -168,6 +192,17 @@ async function salvarEdicao() {
 <p className="mb-8 text-[#F3E8D7]/70">
   Bem-vindo ao gerenciamento da MTelles.
 </p>
+
+<div className="mb-8 w-full max-w-sm rounded-3xl border border-[#C8A95B]/20 bg-[#181818] p-6">
+  <p className="text-sm uppercase tracking-widest text-[#F3E8D7]/60">
+    Acessos ao site
+  </p>
+
+  <h2 className="mt-3 text-4xl font-black text-[#C8A95B]">
+    {totalAcessos.toLocaleString("pt-BR")}
+  </h2>
+</div>
+
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
 

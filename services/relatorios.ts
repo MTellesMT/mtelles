@@ -4,31 +4,98 @@ const PEDIDOS = "pedidos";
 const PRODUTOS = "produtos";
 const MOVIMENTACOES = "movimentacoes";
 
+/*
+ * STATUS QUE SERÁ EXIBIDO
+ * NO RELATÓRIO
+ *
+ * REGRA:
+ *
+ * ENTREGUE + EXCLUÍDO
+ * continua ENTREGUE.
+ *
+ * Qualquer outro status + EXCLUÍDO
+ * passa a aparecer como EXCLUIDO.
+ */
+
+function obterStatusRelatorio(pedido: {
+  status: string;
+  excluido?: boolean | null;
+}) {
+  if (
+    pedido.status === "ENTREGUE"
+  ) {
+    return "ENTREGUE";
+  }
+
+  if (pedido.excluido) {
+    return "EXCLUIDO";
+  }
+
+  return pedido.status;
+}
+
 export async function getResumoRelatorio() {
-  const { data: pedidos, error: erroPedidos } =
-    await supabase
-      .from(PEDIDOS)
-      .select(`
-  id,
-  nome_cliente,
-  status,
-  total,
-  created_at
-`)
-  if (erroPedidos) throw erroPedidos;
+  /*
+   * PEDIDOS
+   *
+   * Aqui buscamos inclusive os pedidos
+   * excluídos porque o relatório precisa
+   * preservar o histórico.
+   */
 
-console.log("PEDIDOS:", pedidos);
+  const {
+    data: pedidos,
+    error: erroPedidos,
+  } = await supabase
+    .from(PEDIDOS)
+    .select(`
+      id,
+      nome_cliente,
+      status,
+      total,
+      created_at,
+      excluido,
+      excluido_em
+    `)
+    .order("created_at", {
+      ascending: false,
+    });
 
-  const { data: produtos, error: erroProdutos } =
-    await supabase
-      .from(PRODUTOS)
-      .select(
-  "id,nome,codigo,marca,cores,estoque"
-)
+  if (erroPedidos) {
+    throw erroPedidos;
+  }
 
-  if (erroProdutos) throw erroProdutos;
+  console.log(
+    "PEDIDOS:",
+    pedidos
+  );
 
-console.log("PRODUTOS:", produtos);
+  /*
+   * PRODUTOS
+   */
+
+  const {
+    data: produtos,
+    error: erroProdutos,
+  } = await supabase
+    .from(PRODUTOS)
+    .select(
+      "id,nome,codigo,marca,cores,estoque"
+    );
+
+  if (erroProdutos) {
+    throw erroProdutos;
+  }
+
+  console.log(
+    "PRODUTOS:",
+    produtos
+  );
+
+  /*
+   * MOVIMENTAÇÕES
+   */
+
   const {
     data: movimentacoes,
     error: erroMovimentacoes,
@@ -39,41 +106,102 @@ console.log("PRODUTOS:", produtos);
       ascending: false,
     });
 
-  if (erroMovimentacoes)
+  if (erroMovimentacoes) {
     throw erroMovimentacoes;
+  }
+
+  /*
+   * PEDIDOS ENTREGUES
+   *
+   * IMPORTANTE:
+   *
+   * Um pedido entregue continua sendo
+   * considerado entregue mesmo que tenha
+   * sido posteriormente excluído da área
+   * operacional de Pedidos.
+   *
+   * Dessa forma preservamos o faturamento
+   * histórico da loja.
+   */
 
   const pedidosEntregues =
     pedidos?.filter(
       (pedido) =>
-        pedido.status === "ENTREGUE"
+        pedido.status ===
+        "ENTREGUE"
     ) ?? [];
+
+  /*
+   * FATURAMENTO
+   *
+   * Somente pedidos efetivamente
+   * entregues entram no faturamento.
+   *
+   * ENTREGUE + excluido = continua contando.
+   *
+   * PENDENTE/ENVIADO/CANCELADO + excluido
+   * = não entra no faturamento.
+   */
 
   const faturamento =
     pedidosEntregues.reduce(
-      (total, pedido) =>
-        total + Number(pedido.total),
+      (
+        total,
+        pedido
+      ) =>
+        total +
+        Number(
+          pedido.total
+        ),
       0
     );
 
+  /*
+   * ESTOQUE TOTAL
+   */
+
   const estoqueTotal =
     produtos?.reduce(
-      (total, produto) =>
+      (
+        total,
+        produto
+      ) =>
         total +
-        Number(produto.estoque),
+        Number(
+          produto.estoque
+        ),
       0
     ) ?? 0;
+
+  /*
+   * PRODUTOS COM
+   * BAIXO ESTOQUE
+   */
 
   const produtosBaixoEstoque =
     produtos?.filter(
       (produto) =>
-        Number(produto.estoque) <= 5
+        Number(
+          produto.estoque
+        ) <= 5
     ) ?? [];
 
+  /*
+   * VALOR MÉDIO DOS
+   * PEDIDOS ENTREGUES
+   */
+
   const valorMedioPedido =
-    pedidosEntregues.length === 0
+    pedidosEntregues.length ===
+    0
       ? 0
       : faturamento /
         pedidosEntregues.length;
+
+  /*
+   * PERCENTUAL DE
+   * PEDIDOS ENTREGUES
+   */
 
   const percentualEntregues =
     pedidos?.length === 0
@@ -81,8 +209,16 @@ console.log("PRODUTOS:", produtos);
       : (pedidosEntregues.length *
           100) /
         (pedidos?.length ?? 1);
-        
-console.log("BAIXO ESTOQUE:", produtosBaixoEstoque);
+
+  console.log(
+    "BAIXO ESTOQUE:",
+    produtosBaixoEstoque
+  );
+
+  /*
+   * RETORNO DO RELATÓRIO
+   */
+
   return {
     totalPedidos:
       pedidos?.length ?? 0,
@@ -98,36 +234,99 @@ console.log("BAIXO ESTOQUE:", produtosBaixoEstoque);
 
     percentualEntregues,
 
+    /*
+     * BAIXO ESTOQUE
+     */
+
     produtosBaixoEstoque:
-  produtosBaixoEstoque.map(
-    (produto) => ({
-      marca: produto.marca,
-      nome: produto.nome,
-      estoque: Number(
-        produto.estoque
+      produtosBaixoEstoque.map(
+        (produto) => ({
+          marca:
+            produto.marca,
+
+          nome:
+            produto.nome,
+
+          estoque:
+            Number(
+              produto.estoque
+            ),
+        })
       ),
-    })
-  ),
+
+    /*
+     * MOVIMENTAÇÕES
+     */
+
     movimentacoes:
       movimentacoes ?? [],
 
-pedidos:
-  pedidos?.map((pedido) => ({
-    id: pedido.id,
-    cliente: pedido.nome_cliente,
-    status: pedido.status,
-    total: Number(pedido.total),
-    created_at: pedido.created_at,
-  })) ?? [],
+    /*
+     * PEDIDOS
+     *
+     * Aqui aplicamos o status visual
+     * correto para o relatório.
+     */
 
-     produtos:
-produtos?.map((produto) => ({
-   id: produto.id,
-  nome: produto.nome,
-   codigo: produto.codigo,
-   marca: produto.marca,
-   cores: produto.cores,
-   estoque: Number(produto.estoque),
- })) ?? [],
+    pedidos:
+      pedidos?.map(
+        (pedido) => ({
+          id:
+            pedido.id,
+
+          cliente:
+            pedido.nome_cliente,
+
+          status:
+            obterStatusRelatorio(
+              pedido
+            ),
+
+          total:
+            Number(
+              pedido.total
+            ),
+
+          created_at:
+            pedido.created_at,
+
+          excluido:
+            pedido.excluido ??
+            false,
+
+          excluido_em:
+            pedido.excluido_em ??
+            null,
+        })
+      ) ?? [],
+
+    /*
+     * PRODUTOS
+     */
+
+    produtos:
+      produtos?.map(
+        (produto) => ({
+          id:
+            produto.id,
+
+          nome:
+            produto.nome,
+
+          codigo:
+            produto.codigo,
+
+          marca:
+            produto.marca,
+
+          cores:
+            produto.cores,
+
+          estoque:
+            Number(
+              produto.estoque
+            ),
+        })
+      ) ?? [],
   };
 }

@@ -11,6 +11,7 @@ import Hero from "@/components/hero";
 import ProductCard from "@/components/ProductCard";
 import SearchBar from "@/components/SearchBar";
 
+import { registrarAcessoSite } from "@/services/acessos";
 import { getProducts } from "@/services/products";
 import { Product } from "@/types/product";
 
@@ -50,8 +51,7 @@ function transformarEmLista(
         .filter(Boolean);
     }
   } catch {
-    // O campo também pode conter valores
-    // separados por vírgulas.
+    // Pode estar separado por vírgulas.
   }
 
   return valor
@@ -125,13 +125,93 @@ export default function Home() {
     setCorSelecionada,
   ] = useState(OPCAO_TODAS);
 
-  const [
+   const [
     ordenacao,
     setOrdenacao,
   ] =
     useState<TipoOrdenacao>(
       "recentes"
     );
+
+  /*
+   * REGISTRAR ACESSO AO SITE
+   *
+   * Cada navegador/dispositivo
+   * é contabilizado apenas uma vez.
+   */
+
+  useEffect(() => {
+    async function registrarAcesso() {
+      try {
+        await registrarAcessoSite();
+      } catch (error) {
+        console.error(
+          "Erro ao registrar acesso ao site:",
+          error
+        );
+      }
+    }
+
+    registrarAcesso();
+  }, []);
+
+  /*
+   * RECEBER PESQUISA INICIAL DA URL
+   */
+
+  useEffect(() => {
+    function receberPesquisa(
+      event: Event
+    ) {
+      const evento =
+        event as CustomEvent<{
+          busca: string;
+        }>;
+
+      const pesquisa =
+        evento.detail?.busca?.trim();
+
+      if (!pesquisa) {
+        return;
+      }
+
+      /*
+       * Limpa filtros anteriores para
+       * a pesquisa do Header procurar
+       * em todo o catálogo.
+       */
+
+      setMarcaSelecionada(
+        OPCAO_TODAS
+      );
+
+      setCategoriaSelecionada(
+        OPCAO_TODAS
+      );
+
+      setCorSelecionada(
+        OPCAO_TODAS
+      );
+
+      setBusca(pesquisa);
+    }
+
+    window.addEventListener(
+      "mtelles-pesquisar",
+      receberPesquisa
+    );
+
+    return () => {
+      window.removeEventListener(
+        "mtelles-pesquisar",
+        receberPesquisa
+      );
+    };
+  }, []);
+
+  /*
+   * CARREGAR PRODUTOS
+   */
 
   useEffect(() => {
     async function carregarProdutos() {
@@ -169,11 +249,6 @@ export default function Home() {
 
   /*
    * MAIS VENDIDOS
-   *
-   * A seleção é manual através do campo
-   * mais_vendido cadastrado no produto.
-   *
-   * Apenas produtos ativos aparecem aqui.
    */
 
   const produtosMaisVendidos =
@@ -247,8 +322,7 @@ export default function Home() {
     }, [produtosAtivos]);
 
   /*
-   * GARANTE QUE UMA MARCA REMOVIDA
-   * NÃO CONTINUE SELECIONADA
+   * VALIDAR MARCA
    */
 
   useEffect(() => {
@@ -272,8 +346,7 @@ export default function Home() {
   ]);
 
   /*
-   * GARANTE QUE UMA CATEGORIA REMOVIDA
-   * NÃO CONTINUE SELECIONADA
+   * VALIDAR CATEGORIA
    */
 
   useEffect(() => {
@@ -299,8 +372,7 @@ export default function Home() {
   ]);
 
   /*
-   * GARANTE QUE UMA COR REMOVIDA
-   * NÃO CONTINUE SELECIONADA
+   * VALIDAR COR
    */
 
   useEffect(() => {
@@ -341,10 +413,22 @@ export default function Home() {
     setCorSelecionada(
       OPCAO_TODAS
     );
+
+    if (
+      typeof window !==
+      "undefined"
+    ) {
+      window.history.replaceState(
+        {},
+        "",
+        window.location.pathname +
+          window.location.hash
+      );
+    }
   }
 
   /*
-   * FILTRAGEM DO CATÁLOGO
+   * FILTRAGEM
    */
 
   const produtosFiltrados =
@@ -379,8 +463,6 @@ export default function Home() {
               produto.descricao
             );
 
-        
-
           const coresTexto =
             normalizar(
               produto.cores
@@ -408,7 +490,6 @@ export default function Home() {
             descricao.includes(
               pesquisa
             ) ||
-            
             coresTexto.includes(
               pesquisa
             ) ||
@@ -465,7 +546,7 @@ export default function Home() {
     ]);
 
   /*
-   * ORDENAÇÃO DO CATÁLOGO
+   * ORDENAÇÃO
    */
 
   const produtosOrdenados =
@@ -521,10 +602,6 @@ export default function Home() {
         );
       }
 
-      /*
-       * MAIS RECENTES
-       */
-
       return lista.sort(
         (produtoA, produtoB) => {
           const dataA =
@@ -549,8 +626,112 @@ export default function Home() {
       ordenacao,
     ]);
 
+  /*
+   * ORGANIZAR POR CATEGORIA
+   */
+
+  const produtosPorCategoria =
+    useMemo(() => {
+      const grupos = new Map<
+        string,
+        {
+          nome: string;
+          produtos: Product[];
+        }
+      >();
+
+      produtosOrdenados.forEach(
+        (produto) => {
+          const nomeCategoria =
+            produto.categoria?.trim() ||
+            "Outros";
+
+          const chave =
+            normalizar(
+              nomeCategoria
+            ) || "outros";
+
+          const grupoExistente =
+            grupos.get(chave);
+
+          if (grupoExistente) {
+            grupoExistente.produtos.push(
+              produto
+            );
+
+            return;
+          }
+
+          grupos.set(chave, {
+            nome: nomeCategoria,
+            produtos: [produto],
+          });
+        }
+      );
+
+      return Array.from(
+        grupos.values()
+      ).sort((grupoA, grupoB) =>
+        grupoA.nome.localeCompare(
+          grupoB.nome,
+          "pt-BR",
+          {
+            sensitivity: "base",
+          }
+        )
+      );
+    }, [produtosOrdenados]);
+
   const quantidadeResultados =
     produtosOrdenados.length;
+
+  /*
+   * APÓS A PESQUISA SER PROCESSADA,
+   * DESCE PARA O RESULTADO.
+   */
+
+  useEffect(() => {
+    if (
+      loading ||
+      !busca.trim()
+    ) {
+      return;
+    }
+
+    const timer =
+      window.setTimeout(() => {
+        const primeiroProduto =
+          document.querySelector(
+            "[data-produto-pesquisa]"
+          );
+
+        if (primeiroProduto) {
+          primeiroProduto.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+
+          return;
+        }
+
+        const colecao =
+          document.getElementById(
+            "colecao"
+          );
+
+        colecao?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+
+    return () =>
+      window.clearTimeout(timer);
+  }, [
+    busca,
+    loading,
+    produtosOrdenados,
+  ]);
 
   return (
     <main className="min-h-screen bg-[#111111] text-white">
@@ -571,8 +752,6 @@ export default function Home() {
             className="relative border-b border-[#C8A95B]/15 bg-[#151515]"
           >
             <div className="mx-auto w-full max-w-[1700px] px-4 py-14 sm:px-6 sm:py-20">
-              {/* CABEÇALHO */}
-
               <header className="mb-10 flex flex-col gap-5 sm:mb-12 md:flex-row md:items-end md:justify-between">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C8A95B] sm:text-sm sm:tracking-[0.35em]">
@@ -598,27 +777,19 @@ export default function Home() {
                 </a>
               </header>
 
-              {/* PRODUTOS */}
-
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {produtosMaisVendidos.map(
                   (produto) => (
                     <div
-                      key={
-                        produto.id
-                      }
+                      key={produto.id}
                       className="relative min-w-0"
                     >
-                      {/* SELO */}
-
                       <div className="pointer-events-none absolute left-4 top-4 z-20 rounded-full border border-[#C8A95B]/40 bg-[#111111]/90 px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-[#C8A95B] shadow-lg backdrop-blur-md">
                         Mais vendido
                       </div>
 
                       <ProductCard
-                        produto={
-                          produto
-                        }
+                        produto={produto}
                       />
                     </div>
                   )
@@ -632,11 +803,9 @@ export default function Home() {
 
       <section
         id="colecao"
-        className="relative isolate bg-[#111111]"
+        className="relative isolate scroll-mt-24 bg-[#111111]"
       >
         <div className="mx-auto w-full max-w-[1700px] px-4 py-14 sm:px-6 sm:py-20">
-          {/* TÍTULO DO CATÁLOGO */}
-
           <header className="mb-10 sm:mb-12">
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C8A95B] sm:text-sm sm:tracking-[0.35em]">
               Nossa coleção
@@ -647,20 +816,11 @@ export default function Home() {
             </h2>
           </header>
 
-          {/*
-            MOBILE:
-            Os filtros ficam no fluxo normal da página.
-
-            DESKTOP:
-            A partir de lg, filtros e produtos
-            ficam em duas colunas.
-          */}
-
           <div className="block lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start lg:gap-8">
-            {/* ÁREA DOS FILTROS */}
+            {/* FILTROS */}
 
-            <div className="relative z-10 mb-10 w-full lg:sticky lg:top-6 lg:mb-0">               
-               <SearchBar
+            <div className="relative z-10 mb-10 w-full lg:sticky lg:top-6 lg:mb-0">
+              <SearchBar
                 busca={busca}
                 setBusca={setBusca}
                 produtos={products}
@@ -700,7 +860,7 @@ export default function Home() {
               />
             </div>
 
-            {/* ÁREA DOS PRODUTOS */}
+            {/* PRODUTOS */}
 
             <div className="relative z-0 min-w-0">
               {loading ? (
@@ -710,8 +870,6 @@ export default function Home() {
               ) : produtosOrdenados.length >
                 0 ? (
                 <>
-                  {/* CABEÇALHO DOS RESULTADOS */}
-
                   <div className="mb-8 flex flex-col gap-5 rounded-3xl border border-[#C8A95B]/15 bg-[#151515] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                     <div>
                       <h3 className="text-2xl font-bold">
@@ -731,15 +889,10 @@ export default function Home() {
 
                     <select
                       aria-label="Ordenar produtos"
-                      value={
-                        ordenacao
-                      }
-                      onChange={(
-                        event
-                      ) =>
+                      value={ordenacao}
+                      onChange={(event) =>
                         setOrdenacao(
-                          event
-                            .target
+                          event.target
                             .value as TipoOrdenacao
                         )
                       }
@@ -763,23 +916,60 @@ export default function Home() {
                     </select>
                   </div>
 
-                  {/* GRID DOS PRODUTOS */}
+                  {/* CATEGORIAS */}
 
-                  <div className="relative grid min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                    {produtosOrdenados.map(
-                      (produto) => (
-                        <div
-                          key={
-                            produto.id
-                          }
-                          className="relative min-w-0"
+                  <div className="space-y-14">
+                    {produtosPorCategoria.map(
+                      (grupo) => (
+                        <section
+                          key={normalizar(
+                            grupo.nome
+                          )}
+                          className="min-w-0"
                         >
-                          <ProductCard
-                            produto={
-                              produto
-                            }
-                          />
-                        </div>
+                          <div className="mb-6 flex items-end justify-between gap-4 border-b border-[#C8A95B]/15 pb-4">
+                            <div>
+                              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#C8A95B]/70">
+                                Categoria
+                              </p>
+
+                              <h3 className="mt-2 text-2xl font-black text-white sm:text-3xl">
+                                {grupo.nome}
+                              </h3>
+                            </div>
+
+                            <p className="shrink-0 text-sm text-[#F3E8D7]/45">
+                              {
+                                grupo.produtos
+                                  .length
+                              }{" "}
+                              {grupo.produtos
+                                .length === 1
+                                ? "produto"
+                                : "produtos"}
+                            </p>
+                          </div>
+
+                          <div className="relative grid min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                            {grupo.produtos.map(
+                              (produto) => (
+                                <div
+                                  key={
+                                    produto.id
+                                  }
+                                  data-produto-pesquisa
+                                  className="relative min-w-0 scroll-mt-28"
+                                >
+                                  <ProductCard
+                                    produto={
+                                      produto
+                                    }
+                                  />
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </section>
                       )
                     )}
                   </div>
@@ -791,16 +981,14 @@ export default function Home() {
                   </div>
 
                   <h3 className="mt-6 text-2xl font-bold sm:text-3xl">
-                    Nenhum produto
-                    encontrado
+                    Nenhum produto encontrado
                   </h3>
 
                   <p className="mx-auto mt-4 max-w-xl leading-7 text-[#F3E8D7]/60">
-                    Tente alterar os
-                    filtros ou limpar a
-                    pesquisa para visualizar
-                    novamente todos os
-                    produtos.
+                    Tente alterar os filtros
+                    ou limpar a pesquisa para
+                    visualizar novamente todos
+                    os produtos.
                   </p>
 
                   <button
