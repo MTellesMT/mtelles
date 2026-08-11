@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import Hero from "@/components/hero";
 import ProductCard from "@/components/ProductCard";
 import SearchBar from "@/components/SearchBar";
+import AvaliacoesClientes from "@/components/AvaliacoesClientes";
 
 import { registrarAcessoSite } from "@/services/acessos";
 import { getProducts } from "@/services/products";
@@ -1061,6 +1062,10 @@ export default function Home() {
           </article>
         </div>
       </section>
+
+{/* AVALIAÇÕES DE CLIENTES */}
+
+<AvaliacoesClientes />
 
       {/* SOBRE */}
 
