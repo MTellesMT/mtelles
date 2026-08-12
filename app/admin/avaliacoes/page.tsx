@@ -7,6 +7,8 @@ import {
   useState,
 } from "react";
 
+import AcessoRestritoPage from "@/components/admin/AcessoRestritoPage";
+
 import {
   Avaliacao,
 } from "@/services/avaliacoes";
@@ -71,6 +73,12 @@ export default function AvaliacoesAdminPage() {
 
   /*
    * CONTROLE DE ACESSO
+   *
+   * MASTER = GERÊNCIA
+   * ADMIN = FUNCIONÁRIO
+   *
+   * Apenas MASTER pode acessar
+   * o gerenciamento de avaliações.
    */
 
   useEffect(() => {
@@ -84,6 +92,21 @@ export default function AvaliacoesAdminPage() {
     ) {
       window.location.replace(
         "/login"
+      );
+
+      return;
+    }
+
+    const nivel =
+      sessionStorage.getItem(
+        "adminNivel"
+      );
+
+    if (
+      nivel !== "MASTER"
+    ) {
+      setAcessoPermitido(
+        false
       );
 
       return;
@@ -339,9 +362,31 @@ export default function AvaliacoesAdminPage() {
     );
   }
 
+  /*
+   * ACESSO RESTRITO
+   *
+   * Funcionários não podem
+   * acessar avaliações.
+   */
+
+  if (
+  acessoPermitido ===
+  false
+) {
+  return (
+    <AcessoRestritoPage
+      onOk={() => {
+        window.location.replace(
+          "/admin"
+        );
+      }}
+    />
+  );
+}
   return (
     <main className="min-h-screen bg-[#111111] p-4 text-white sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
+
         {/* CABEÇALHO */}
 
         <div className="mb-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
