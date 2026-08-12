@@ -3,6 +3,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -102,6 +103,37 @@ function criarListaUnica(
 }
 
 export default function Home() {
+
+  const carrosselMaisVendidos =
+    useRef<HTMLDivElement | null>(
+      null
+    );
+
+  function navegarMaisVendidos(
+    direcao: "esquerda" | "direita"
+  ) {
+    const carrossel =
+      carrosselMaisVendidos.current;
+
+    if (!carrossel) {
+      return;
+    }
+
+    const distancia =
+      Math.max(
+        300,
+        carrossel.clientWidth * 0.8
+      );
+
+    carrossel.scrollBy({
+      left:
+        direcao === "direita"
+          ? distancia
+          : -distancia,
+      behavior: "smooth",
+    });
+  }
+
   const [products, setProducts] =
     useState<Product[]>([]);
 
@@ -175,6 +207,12 @@ export default function Home() {
       if (!pesquisa) {
         return;
       }
+
+      /*
+       * Limpa filtros anteriores para
+       * a pesquisa do Header procurar
+       * em todo o catálogo.
+       */
 
       setMarcaSelecionada(
         OPCAO_TODAS
@@ -772,24 +810,145 @@ export default function Home() {
                 </a>
               </header>
 
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {produtosMaisVendidos.map(
-                  (produto) => (
-                    <div
-                      key={produto.id}
-                      className="relative min-w-0"
-                    >
-                      <div className="pointer-events-none absolute left-4 top-4 z-20 rounded-full border border-[#C8A95B]/40 bg-[#111111]/90 px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-[#C8A95B] shadow-lg backdrop-blur-md">
-                        Mais vendido
-                      </div>
+              <div className="relative">
+  {/* SETA ESQUERDA - DESKTOP */}
 
-                      <ProductCard
-                        produto={produto}
-                      />
-                    </div>
-                  )
-                )}
-              </div>
+  <button
+    type="button"
+    onClick={() =>
+      navegarMaisVendidos(
+        "esquerda"
+      )
+    }
+    aria-label="Ver produtos anteriores"
+    className="
+      absolute
+      left-2
+      top-1/2
+      z-30
+      hidden
+      h-12
+      w-12
+      -translate-y-1/2
+      items-center
+      justify-center
+      rounded-full
+      border
+      border-[#C8A95B]/40
+      bg-[#111111]/90
+      text-2xl
+      font-bold
+      text-[#C8A95B]
+      shadow-xl
+      backdrop-blur-md
+      transition
+      hover:border-[#C8A95B]
+      hover:bg-[#C8A95B]
+      hover:text-[#111111]
+      lg:flex
+    "
+  >
+    ‹
+  </button>
+
+  {/* CARROSSEL */}
+
+  <div
+    ref={carrosselMaisVendidos}
+    className="
+      -mx-4
+      flex
+      snap-x
+      snap-mandatory
+      gap-4
+      overflow-x-auto
+      px-4
+      pb-5
+      scroll-smooth
+      [scrollbar-width:none]
+      [&::-webkit-scrollbar]:hidden
+
+      sm:-mx-6
+      sm:gap-6
+      sm:px-6
+
+      lg:mx-0
+      lg:px-2
+    "
+  >
+    {produtosMaisVendidos.map(
+      (produto) => (
+        <div
+          key={produto.id}
+          className="
+            relative
+            w-[82vw]
+            max-w-[330px]
+            flex-none
+            snap-start
+
+            sm:w-[300px]
+            sm:max-w-[300px]
+
+            lg:w-[320px]
+            lg:max-w-[320px]
+
+            xl:w-[340px]
+            xl:max-w-[340px]
+          "
+        >
+          <div className="pointer-events-none absolute left-4 top-4 z-20 rounded-full border border-[#C8A95B]/40 bg-[#111111]/90 px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-[#C8A95B] shadow-lg backdrop-blur-md">
+            Mais vendido
+          </div>
+
+          <ProductCard
+            produto={produto}
+          />
+        </div>
+      )
+    )}
+  </div>
+
+  {/* SETA DIREITA - DESKTOP */}
+
+  <button
+    type="button"
+    onClick={() =>
+      navegarMaisVendidos(
+        "direita"
+      )
+    }
+    aria-label="Ver próximos produtos"
+    className="
+      absolute
+      right-2
+      top-1/2
+      z-30
+      hidden
+      h-12
+      w-12
+      -translate-y-1/2
+      items-center
+      justify-center
+      rounded-full
+      border
+      border-[#C8A95B]/40
+      bg-[#111111]/90
+      text-2xl
+      font-bold
+      text-[#C8A95B]
+      shadow-xl
+      backdrop-blur-md
+      transition
+      hover:border-[#C8A95B]
+      hover:bg-[#C8A95B]
+      hover:text-[#111111]
+      lg:flex
+    "
+  >
+    ›
+  </button>
+</div>
             </div>
           </section>
         )}
@@ -946,87 +1105,70 @@ export default function Home() {
                           </div>
 
                           {/*
-                           * MOBILE
+                           * MOBILE:
                            *
-                           * Produtos ficam em uma
-                           * faixa horizontal.
+                           * Cada categoria vira
+                           * uma faixa horizontal.
                            *
-                           * O usuário desliza para
-                           * os lados para visualizar
-                           * os demais produtos.
+                           * O próximo produto fica
+                           * parcialmente visível,
+                           * indicando que é possível
+                           * deslizar para o lado.
+                           *
+                           * A partir de LG voltamos
+                           * para o grid tradicional.
                            */}
 
-                          <div className="relative -mx-4 sm:hidden">
-                            <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                              {grupo.produtos.map(
-                                (
-                                  produto
-                                ) => (
-                                  <div
-                                    key={
-                                      produto.id
-                                    }
-                                    data-produto-pesquisa
-                                    className="relative w-[78vw] max-w-[310px] shrink-0 snap-start scroll-mt-28"
-                                  >
-                                    <ProductCard
-                                      produto={
-                                        produto
-                                      }
-                                    />
-                                  </div>
-                                )
-                              )}
+                          <div
+                            className="
+                              -mx-4
+                              flex
+                              snap-x
+                              snap-mandatory
+                              gap-4
+                              overflow-x-auto
+                              px-4
+                              pb-5
+                              [scrollbar-width:none]
+                              [&::-webkit-scrollbar]:hidden
 
-                              {/*
-                               * Espaço final para o
-                               * último produto não
-                               * ficar colado na borda.
-                               */}
+                              sm:-mx-6
+                              sm:px-6
 
-                              <div
-                                aria-hidden="true"
-                                className="w-1 shrink-0"
-                              />
-                            </div>
+                              lg:mx-0
+                              lg:grid
+                              lg:grid-cols-2
+                              lg:gap-6
+                              lg:overflow-visible
+                              lg:px-0
+                              lg:pb-0
+                              lg:snap-none
 
-                            {grupo.produtos
-                              .length >
-                              1 && (
-                              <div className="mt-1 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8A95B]/70">
-                                <span>
-                                  ←
-                                </span>
-
-                                <span>
-                                  Deslize para ver mais
-                                </span>
-
-                                <span>
-                                  →
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/*
-                           * TABLET / DESKTOP
-                           *
-                           * Mantém o grid que já
-                           * existia anteriormente.
-                           */}
-
-                          <div className="relative hidden min-w-0 gap-6 sm:grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                              xl:grid-cols-3
+                              2xl:grid-cols-4
+                            "
+                          >
                             {grupo.produtos.map(
-                              (
-                                produto
-                              ) => (
+                              (produto) => (
                                 <div
                                   key={
                                     produto.id
                                   }
                                   data-produto-pesquisa
-                                  className="relative min-w-0 scroll-mt-28"
+                                  className="
+                                    relative
+                                    w-[82vw]
+                                    max-w-[330px]
+                                    flex-none
+                                    snap-start
+                                    scroll-mt-28
+
+                                    sm:w-[46vw]
+                                    sm:max-w-none
+
+                                    lg:w-auto
+                                    lg:min-w-0
+                                  "
                                 >
                                   <ProductCard
                                     produto={
@@ -1041,7 +1183,7 @@ export default function Home() {
                       )
                     )}
                   </div>
-                </>
+                                  </>
               ) : (
                 <div className="rounded-3xl border border-[#C8A95B]/20 bg-[#181818] px-5 py-20 text-center sm:px-8 sm:py-24">
                   <div className="text-6xl">
