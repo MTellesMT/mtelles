@@ -9,19 +9,34 @@ import {
 import { Product } from "@/types/product";
 import { useCart } from "./CartContext";
 
-const whatsapp = "5521966682941";
-
 interface ProductCardProps {
   produto: Product;
 }
 
+type AcaoSeletor =
+  | "CARRINHO"
+  | "WHATSAPP";
+
 export default function ProductCard({
   produto,
 }: ProductCardProps) {
-  const { adicionarProduto } = useCart();
+  const {
+    adicionarProduto,
+    abrirCarrinho,
+  } = useCart();
 
-  const [seletorAberto, setSeletorAberto] =
-    useState(false);
+  const [
+    seletorAberto,
+    setSeletorAberto,
+  ] = useState(false);
+
+  const [
+    acaoSeletor,
+    setAcaoSeletor,
+  ] =
+    useState<AcaoSeletor>(
+      "CARRINHO"
+    );
 
   const [
     corCompraSelecionada,
@@ -33,63 +48,83 @@ export default function ProductCard({
     setTamanhoSelecionado,
   ] = useState("");
 
-  const imagensDisponiveis = useMemo(() => {
-    const lista: {
-      cor: string;
-      imagem: string;
-    }[] = [];
+  /*
+   * IMAGENS
+   */
 
-    if (produto.imagem_principal) {
-      lista.push({
-        cor: "Principal",
-        imagem:
-          produto.imagem_principal,
-      });
-    }
+  const imagensDisponiveis =
+    useMemo(() => {
+      const lista: {
+        cor: string;
+        imagem: string;
+      }[] = [];
 
-    if (produto.galeria) {
-      try {
-        const galeria = JSON.parse(
-          produto.galeria
-        );
+      if (
+        produto.imagem_principal
+      ) {
+        lista.push({
+          cor: "Principal",
+          imagem:
+            produto.imagem_principal,
+        });
+      }
 
-        if (Array.isArray(galeria)) {
-          galeria.forEach(
-            (
-              imagem: string,
-              index: number
-            ) => {
-              lista.push({
-                cor: `Cor ${
-                  index + 1
-                }`,
-                imagem,
-              });
-            }
+      if (produto.galeria) {
+        try {
+          const galeria =
+            JSON.parse(
+              produto.galeria
+            );
+
+          if (
+            Array.isArray(
+              galeria
+            )
+          ) {
+            galeria.forEach(
+              (
+                imagem: string,
+                index: number
+              ) => {
+                lista.push({
+                  cor: `Cor ${
+                    index + 1
+                  }`,
+                  imagem,
+                });
+              }
+            );
+          }
+        } catch (error) {
+          console.error(
+            "Erro ao carregar galeria:",
+            error
           );
         }
-      } catch (error) {
-        console.error(
-          "Erro ao carregar galeria:",
-          error
-        );
       }
-    }
 
-    return lista;
-  }, [produto]);
+      return lista;
+    }, [produto]);
 
-  const [corSelecionada] = useState(
-    imagensDisponiveis[0]?.cor ?? ""
-  );
+  const [corSelecionada] =
+    useState(
+      imagensDisponiveis[0]
+        ?.cor ?? ""
+    );
 
   const imagemSelecionada =
     imagensDisponiveis.find(
       (item) =>
-        item.cor === corSelecionada
+        item.cor ===
+        corSelecionada
     )?.imagem ??
-    imagensDisponiveis[0]?.imagem ??
+    imagensDisponiveis[0]
+      ?.imagem ??
     "";
+
+  /*
+   * CORES
+   */
 
   const coresDisponiveis =
     useMemo(() => {
@@ -99,9 +134,15 @@ export default function ProductCard({
 
       return produto.cores
         .split(",")
-        .map((cor) => cor.trim())
+        .map((cor) =>
+          cor.trim()
+        )
         .filter(Boolean);
     }, [produto.cores]);
+
+  /*
+   * TAMANHOS
+   */
 
   const tamanhosDisponiveis =
     useMemo(() => {
@@ -117,30 +158,51 @@ export default function ProductCard({
         .filter(Boolean);
     }, [produto.tamanhos]);
 
-  const mensagem = encodeURIComponent(
-    `Olá! Tenho interesse no produto:
+  /*
+   * ABRIR SELETOR
+   */
 
-${produto.nome}
+  function abrirSeletor(
+    acao: AcaoSeletor
+  ) {
+    setCorCompraSelecionada(
+      ""
+    );
 
-Código: ${produto.codigo}`
-  );
+    setTamanhoSelecionado(
+      ""
+    );
 
-  const linkWhatsApp =
-    `https://wa.me/${whatsapp}?text=${mensagem}`;
+    setAcaoSeletor(acao);
 
-  function abrirSeletor() {
-    setCorCompraSelecionada("");
-    setTamanhoSelecionado("");
     setSeletorAberto(true);
   }
 
+  /*
+   * FECHAR SELETOR
+   */
+
   function fecharSeletor() {
     setSeletorAberto(false);
-    setCorCompraSelecionada("");
-    setTamanhoSelecionado("");
+
+    setCorCompraSelecionada(
+      ""
+    );
+
+    setTamanhoSelecionado(
+      ""
+    );
+
+    setAcaoSeletor(
+      "CARRINHO"
+    );
   }
 
-  function adicionarAoCarrinho() {
+  /*
+   * CONFIRMAR ESCOLHA
+   */
+
+  function confirmarEscolha() {
     if (
       !corCompraSelecionada ||
       !tamanhoSelecionado
@@ -154,12 +216,61 @@ Código: ${produto.codigo}`
       corCompraSelecionada
     );
 
+    /*
+     * BOTÃO NORMAL:
+     *
+     * Apenas adiciona o produto.
+     * O carrinho NÃO abre
+     * automaticamente.
+     */
+
+    if (
+      acaoSeletor ===
+      "CARRINHO"
+    ) {
+      fecharSeletor();
+
+      return;
+    }
+
+    /*
+     * COMPRAR PELO WHATSAPP:
+     *
+     * Adiciona o produto e abre
+     * o carrinho.
+     *
+     * A partir daí o cliente
+     * passa pela finalização
+     * normal:
+     *
+     * Nome
+     * WhatsApp
+     * Endereço
+     * Registro do pedido
+     * WhatsApp
+     */
+
     fecharSeletor();
+
+    /*
+     * Pequeno atraso para garantir
+     * que o produto já entrou no
+     * estado do carrinho antes
+     * de abri-lo.
+     */
+
+    window.setTimeout(() => {
+      abrirCarrinho();
+    }, 50);
   }
 
   const podeAdicionar =
-    Boolean(corCompraSelecionada) &&
-    Boolean(tamanhoSelecionado);
+    Boolean(
+      corCompraSelecionada
+    ) &&
+    Boolean(
+      tamanhoSelecionado
+    );
 
   return (
     <>
@@ -181,7 +292,9 @@ Código: ${produto.codigo}`
           >
             {imagemSelecionada ? (
               <img
-                src={imagemSelecionada}
+                src={
+                  imagemSelecionada
+                }
                 alt={produto.nome}
                 className="h-[260px] w-full object-contain"
               />
@@ -204,7 +317,9 @@ Código: ${produto.codigo}`
         <div className="p-5">
           <div className="flex items-center justify-between">
             <span className="rounded-full border border-[#C8A95B]/30 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#C8A95B]">
-              {produto.categoria}
+              {
+                produto.categoria
+              }
             </span>
 
             <span className="text-sm text-[#F3E8D7]/45">
@@ -244,10 +359,16 @@ Código: ${produto.codigo}`
             </div>
           </div>
 
+          {/* BOTÕES */}
+
           <div className="mt-6 grid gap-3">
             <button
               type="button"
-              onClick={abrirSeletor}
+              onClick={() =>
+                abrirSeletor(
+                  "CARRINHO"
+                )
+              }
               className="rounded-full bg-white py-3 text-center text-base font-bold text-[#111111] transition-all duration-300 hover:scale-[1.03] hover:bg-[#F3E8D7]"
             >
               Adicionar ao Carrinho
@@ -260,25 +381,30 @@ Código: ${produto.codigo}`
               Ver detalhes
             </Link>
 
-            <a
-              href={linkWhatsApp}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() =>
+                abrirSeletor(
+                  "WHATSAPP"
+                )
+              }
               className="rounded-full bg-[#C8A95B] py-3 text-center text-base font-bold text-[#111111] transition-all duration-300 hover:scale-[1.04] hover:bg-[#e5c96f]"
             >
               Comprar pelo WhatsApp
-            </a>
+            </button>
           </div>
         </div>
       </article>
 
-      {/* SELETOR RÁPIDO DE COR E TAMANHO */}
+      {/* SELETOR RÁPIDO */}
 
       {seletorAberto && (
         <>
           <div
             className="fixed inset-0 z-[110] bg-black/75 backdrop-blur-sm"
-            onClick={fecharSeletor}
+            onClick={
+              fecharSeletor
+            }
           />
 
           <div className="fixed left-1/2 top-1/2 z-[120] w-[calc(100%-32px)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-[#C8A95B]/30 bg-[#181818] shadow-2xl">
@@ -287,7 +413,10 @@ Código: ${produto.codigo}`
             <div className="flex items-start justify-between border-b border-[#C8A95B]/15 px-6 py-5">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#C8A95B]">
-                  Adicionar ao Carrinho
+                  {acaoSeletor ===
+                  "WHATSAPP"
+                    ? "Comprar pelo WhatsApp"
+                    : "Adicionar ao Carrinho"}
                 </p>
 
                 <h2 className="mt-2 text-xl font-bold text-white">
@@ -302,7 +431,9 @@ Código: ${produto.codigo}`
 
               <button
                 type="button"
-                onClick={fecharSeletor}
+                onClick={
+                  fecharSeletor
+                }
                 aria-label="Fechar"
                 className="ml-4 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-2xl text-[#C8A95B] transition hover:bg-[#C8A95B]/10"
               >
@@ -329,7 +460,9 @@ Código: ${produto.codigo}`
 
                         return (
                           <button
-                            key={cor}
+                            key={
+                              cor
+                            }
                             type="button"
                             onClick={() =>
                               setCorCompraSelecionada(
@@ -374,7 +507,9 @@ Código: ${produto.codigo}`
 
                         return (
                           <button
-                            key={tamanho}
+                            key={
+                              tamanho
+                            }
                             type="button"
                             onClick={() =>
                               setTamanhoSelecionado(
@@ -387,7 +522,9 @@ Código: ${produto.codigo}`
                                 : "border-[#C8A95B]/30 bg-[#111111] text-white hover:border-[#C8A95B]"
                             }`}
                           >
-                            {tamanho}
+                            {
+                              tamanho
+                            }
                           </button>
                         );
                       }
@@ -421,22 +558,31 @@ Código: ${produto.codigo}`
                 </span>
               </div>
 
-              {/* ADICIONAR */}
+              {/* CONFIRMAR */}
 
               <button
                 type="button"
-                onClick={adicionarAoCarrinho}
-                disabled={!podeAdicionar}
+                onClick={
+                  confirmarEscolha
+                }
+                disabled={
+                  !podeAdicionar
+                }
                 className="mt-5 w-full rounded-full bg-[#C8A95B] py-4 font-bold text-[#111111] transition hover:bg-[#e5c96f] disabled:cursor-not-allowed disabled:opacity-35"
               >
-                {podeAdicionar
-                  ? "Adicionar ao Carrinho"
-                  : "Selecione cor e tamanho"}
+                {!podeAdicionar
+                  ? "Selecione cor e tamanho"
+                  : acaoSeletor ===
+                      "WHATSAPP"
+                    ? "Continuar compra"
+                    : "Adicionar ao Carrinho"}
               </button>
 
               <button
                 type="button"
-                onClick={fecharSeletor}
+                onClick={
+                  fecharSeletor
+                }
                 className="mt-3 w-full py-2 text-sm font-semibold text-[#F3E8D7]/55 transition hover:text-white"
               >
                 Cancelar
