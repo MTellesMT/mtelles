@@ -126,7 +126,7 @@ export default function Home() {
     setCorSelecionada,
   ] = useState(OPCAO_TODAS);
 
-   const [
+  const [
     ordenacao,
     setOrdenacao,
   ] =
@@ -175,12 +175,6 @@ export default function Home() {
       if (!pesquisa) {
         return;
       }
-
-      /*
-       * Limpa filtros anteriores para
-       * a pesquisa do Header procurar
-       * em todo o catálogo.
-       */
 
       setMarcaSelecionada(
         OPCAO_TODAS
@@ -951,9 +945,82 @@ export default function Home() {
                             </p>
                           </div>
 
-                          <div className="relative grid min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                          {/*
+                           * MOBILE
+                           *
+                           * Produtos ficam em uma
+                           * faixa horizontal.
+                           *
+                           * O usuário desliza para
+                           * os lados para visualizar
+                           * os demais produtos.
+                           */}
+
+                          <div className="relative -mx-4 sm:hidden">
+                            <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                              {grupo.produtos.map(
+                                (
+                                  produto
+                                ) => (
+                                  <div
+                                    key={
+                                      produto.id
+                                    }
+                                    data-produto-pesquisa
+                                    className="relative w-[78vw] max-w-[310px] shrink-0 snap-start scroll-mt-28"
+                                  >
+                                    <ProductCard
+                                      produto={
+                                        produto
+                                      }
+                                    />
+                                  </div>
+                                )
+                              )}
+
+                              {/*
+                               * Espaço final para o
+                               * último produto não
+                               * ficar colado na borda.
+                               */}
+
+                              <div
+                                aria-hidden="true"
+                                className="w-1 shrink-0"
+                              />
+                            </div>
+
+                            {grupo.produtos
+                              .length >
+                              1 && (
+                              <div className="mt-1 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8A95B]/70">
+                                <span>
+                                  ←
+                                </span>
+
+                                <span>
+                                  Deslize para ver mais
+                                </span>
+
+                                <span>
+                                  →
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/*
+                           * TABLET / DESKTOP
+                           *
+                           * Mantém o grid que já
+                           * existia anteriormente.
+                           */}
+
+                          <div className="relative hidden min-w-0 gap-6 sm:grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                             {grupo.produtos.map(
-                              (produto) => (
+                              (
+                                produto
+                              ) => (
                                 <div
                                   key={
                                     produto.id
@@ -1063,9 +1130,9 @@ export default function Home() {
         </div>
       </section>
 
-{/* AVALIAÇÕES DE CLIENTES */}
+      {/* AVALIAÇÕES DE CLIENTES */}
 
-<AvaliacoesClientes />
+      <AvaliacoesClientes />
 
       {/* SOBRE */}
 
